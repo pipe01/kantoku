@@ -1,8 +1,10 @@
 ﻿using Kantoku.Master.Media.Services;
+using Kantoku.Master.ViewModels;
 using LightInject;
 using Serilog;
 using System;
 using System.Windows;
+using System.Windows.Threading;
 using TypeFinder;
 
 namespace Kantoku.Master
@@ -27,12 +29,16 @@ namespace Kantoku.Master
                     rollOnFileSizeLimit: true)
                 .CreateLogger();
 
+            Log.Information("===========================================");
             Log.Debug("Registering services");
 
             var container = new ServiceContainer();
             container.RegisterInstance(Log.Logger);
             container.RegisterInstance(Config.Load("config.yaml"));
             container.Register<IServiceManager, ServiceManager>();
+            container.RegisterInstance(Dispatcher);
+            container.RegisterSingleton<DashboardViewModel>();
+            container.RegisterSingleton<MainWindow>();
 
             foreach (var type in FindTypes.InCurrentAssembly.ThatInherit<IService>())
             {
@@ -43,9 +49,9 @@ namespace Kantoku.Master
 
             Log.Information("Kantoku starting up");
 
-            await container.GetInstance<IServiceManager>().Start();
-
-            base.OnStartup(e);
+            MainWindow = container.GetInstance<MainWindow>();
+            MainWindow.Closed += delegate { Shutdown(); };
+            MainWindow.Show();
         }
 
         protected override void OnExit(ExitEventArgs e)

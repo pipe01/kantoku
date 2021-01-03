@@ -1,11 +1,10 @@
-﻿using Kantoku.Master.Media.Services;
-using Serilog;
+﻿using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 using Windows.Media.Control;
 
 namespace Kantoku.Master.Media.Services
@@ -16,7 +15,7 @@ namespace Kantoku.Master.Media.Services
 
         private readonly ILogger Logger;
         private readonly IDictionary<GlobalSystemMediaTransportControlsSession, Session> Sessions = new Dictionary<GlobalSystemMediaTransportControlsSession, Session>();
-        private GlobalSystemMediaTransportControlsSessionManager Manager;
+        private GlobalSystemMediaTransportControlsSessionManager? Manager;
 
         public MediaService(ILogger logger)
         {
@@ -35,12 +34,14 @@ namespace Kantoku.Master.Media.Services
 
             foreach (var item in Manager.GetSessions())
             {
-                StartSession(item);
+                await StartSession(item);
             }
         }
 
-        private void Manager_SessionsChanged(GlobalSystemMediaTransportControlsSessionManager sender, SessionsChangedEventArgs args)
+        private async void Manager_SessionsChanged(GlobalSystemMediaTransportControlsSessionManager sender, SessionsChangedEventArgs args)
         {
+            Debug.Assert(Manager != null);
+
             Logger.Verbose("Sessions change detected");
 
             var sessions = Manager.GetSessions();
@@ -51,7 +52,7 @@ namespace Kantoku.Master.Media.Services
                 {
                     Logger.Verbose("Starting session");
 
-                    StartSession(ses);
+                    await StartSession(ses);
                 }
             }
 
@@ -67,11 +68,12 @@ namespace Kantoku.Master.Media.Services
             }
         }
 
-        private void StartSession(GlobalSystemMediaTransportControlsSession gsmtcSession)
+        private async Task StartSession(GlobalSystemMediaTransportControlsSession gsmtcSession)
         {
             var session = new Session(gsmtcSession, Logger);
+            await session.LoadInfo();
 
-            Logger.Debug("Started session with ID {ID}", session.ID);
+            Logger.Debug("Started session with ID {ID}, app model {Model}", session.ID, gsmtcSession.SourceAppUserModelId);
 
             Sessions.Add(gsmtcSession, session);
             SessionStarted(this, session);
@@ -83,11 +85,14 @@ namespace Kantoku.Master.Media.Services
 
             public bool IsPlaying => GSMTCSession.GetPlaybackInfo().PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing;
 
-            public MediaInfo? Media => !IsPlaying || MediaProperties == null ? null : new MediaInfo(MediaProperties.Title, MediaProperties.Artist);
+            public MediaInfo? Media => MediaProperties == null ? null : new MediaInfo(MediaProperties.Title, MediaProperties.Artist);
 
             public Guid ID { get; }
 
+            public ImageSource Icon { get; }
+
             public event Action Closed = delegate { };
+            public event Action Updated = delegate { };
 
             private readonly GlobalSystemMediaTransportControlsSession GSMTCSession;
             private readonly ILogger Logger;
@@ -133,6 +138,7 @@ namespace Kantoku.Master.Media.Services
                 Logger.Verbose("Reloading media properties");
 
                 MediaProperties = await GSMTCSession.TryGetMediaPropertiesAsync();
+                Updated();
             }
 
             public async Task Pause()

@@ -5,9 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Kantoku.Master"
         mc:Ignorable="d" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize"
-        Foreground="#1561C2"
+        Foreground="#1561C2" Loaded="Window_Loaded"
         Title="Kantoku" Height="234" Width="324">
-    <Grid Margin="5">
+    <Grid Margin="15">
         <Grid.RowDefinitions>
             <RowDefinition Height="22*"/>
             <RowDefinition Height="45*"/>
@@ -18,11 +18,13 @@
             Kantoku master
         </TextBlock>
 
-        <StackPanel Grid.Row="1">
-            <Label HorizontalAlignment="Center">Services:</Label>
+        <DockPanel Grid.Row="1">
+            <Label DockPanel.Dock="Top" HorizontalAlignment="Center">Sessions:</Label>
 
-            <ListBox></ListBox>
-        </StackPanel>
+            <ListBox ItemsSource="{Binding Sessions}" DisplayMemberPath="FullName">
+
+            </ListBox>
+        </DockPanel>
         
     </Grid>
 </Window>

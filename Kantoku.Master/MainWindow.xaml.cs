@@ -1,17 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Kantoku.Master.ViewModels;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Kantoku.Master
 {
@@ -20,9 +8,21 @@ namespace Kantoku.Master
     /// </summary>
     public partial class MainWindow : Window
     {
+        private DashboardViewModel? ViewModel;
+
         public MainWindow()
         {
             InitializeComponent();
+        }
+        public MainWindow(DashboardViewModel viewModel) : this()
+        {
+            this.DataContext = ViewModel = viewModel;
+        }
+
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel != null)
+                await ViewModel.Start();
         }
     }
 }

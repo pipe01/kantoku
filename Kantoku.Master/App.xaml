@@ -1,8 +1,7 @@
 ﻿<Application x:Class="Kantoku.Master.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:Kantoku.Master"
-             StartupUri="MainWindow.xaml">
+             xmlns:local="clr-namespace:Kantoku.Master">
     <Application.Resources>
          
     </Application.Resources>
