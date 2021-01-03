@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Serilog;
 using System.Windows;
 
 namespace Kantoku.Master
@@ -13,5 +8,19 @@ namespace Kantoku.Master
     /// </summary>
     public partial class App : Application
     {
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .WriteTo.Debug()
+                .WriteTo.File("logs/kantoku.txt",
+                    rollingInterval: RollingInterval.Day,
+                    rollOnFileSizeLimit: true)
+                .CreateLogger();
+
+            Log.Information("Kantoku starting up");
+
+            base.OnStartup(e);
+        }
     }
 }
