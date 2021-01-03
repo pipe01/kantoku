@@ -20,7 +20,7 @@ namespace Kantoku.Master
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
         }
 
-        protected override async void OnStartup(StartupEventArgs e)
+        protected override void OnStartup(StartupEventArgs e)
         {
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Verbose()

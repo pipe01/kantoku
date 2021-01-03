@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using Kantoku.Master.Helpers.Fetchers;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,12 +15,14 @@ namespace Kantoku.Master.Media.Services
         public event EventHandler<ISession> SessionStarted = delegate { };
 
         private readonly ILogger Logger;
+        private readonly IAppInfoFetcher AppInfoFetcher;
         private readonly IDictionary<GlobalSystemMediaTransportControlsSession, Session> Sessions = new Dictionary<GlobalSystemMediaTransportControlsSession, Session>();
         private GlobalSystemMediaTransportControlsSessionManager? Manager;
 
-        public MediaService(ILogger logger)
+        public MediaService(ILogger logger, IAppInfoFetcher appInfoFetcher)
         {
             this.Logger = logger.ForContext<MediaService>();
+            this.AppInfoFetcher = appInfoFetcher;
         }
 
         public async Task Start()
@@ -70,7 +73,7 @@ namespace Kantoku.Master.Media.Services
 
         private async Task StartSession(GlobalSystemMediaTransportControlsSession gsmtcSession)
         {
-            var session = await Session.New(gsmtcSession, Logger);
+            var session = await Session.New(gsmtcSession, Logger, AppInfoFetcher);
 
             Logger.Debug("Started session with ID {ID}, app model {Model}", session.ID, gsmtcSession.SourceAppUserModelId);
 
@@ -88,7 +91,7 @@ namespace Kantoku.Master.Media.Services
 
             public Guid ID { get; }
 
-            public ImageSource Icon { get; }
+            public AppInfo App { get; }
 
             public event Action Closed = delegate { };
             public event Action Updated = delegate { };
@@ -97,19 +100,22 @@ namespace Kantoku.Master.Media.Services
             private readonly ILogger Logger;
             private GlobalSystemMediaTransportControlsSessionMediaProperties? MediaProperties;
 
-            private Session(GlobalSystemMediaTransportControlsSession gSMTCSession, ILogger rootLogger)
+            private Session(GlobalSystemMediaTransportControlsSession gSMTCSession, ILogger rootLogger, AppInfo app)
             {
                 this.GSMTCSession = gSMTCSession;
                 this.ID = Guid.NewGuid();
                 this.Logger = rootLogger.ForContext("Session", ID);
+                this.App = app;
 
                 GSMTCSession.MediaPropertiesChanged += GSMTCSession_MediaPropertiesChanged;
                 GSMTCSession.PlaybackInfoChanged += GSMTCSession_PlaybackInfoChanged;
             }
 
-            public static async Task<Session> New(GlobalSystemMediaTransportControlsSession gsmtcSession, ILogger rootLogger)
+            public static async Task<Session> New(GlobalSystemMediaTransportControlsSession gsmtcSession, ILogger rootLogger, IAppInfoFetcher appInfoFetcher)
             {
-                var session = new Session(gsmtcSession, rootLogger);
+                var appInfo = await appInfoFetcher.FetchInfo(gsmtcSession.SourceAppUserModelId);
+
+                var session = new Session(gsmtcSession, rootLogger, appInfo);
                 await session.LoadInfo();
 
                 return session;

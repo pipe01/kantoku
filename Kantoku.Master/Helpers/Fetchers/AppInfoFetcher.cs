@@ -1,11 +1,8 @@
 ﻿using Serilog;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
@@ -43,7 +40,7 @@ namespace Kantoku.Master.Helpers.Fetchers
         {
             Logger.Debug("App is win32");
 
-            Process? proc = Process.GetProcessesByName(appId).FirstOrDefault();
+            Process? proc = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(appId)).FirstOrDefault();
 
             if (proc == null)
                 throw new FileNotFoundException($"No process found for {appId}");

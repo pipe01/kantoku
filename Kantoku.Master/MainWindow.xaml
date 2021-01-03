@@ -21,9 +21,16 @@
         <DockPanel Grid.Row="1">
             <Label DockPanel.Dock="Top" HorizontalAlignment="Center">Sessions:</Label>
 
-            <ListBox ItemsSource="{Binding Sessions}" DisplayMemberPath="FullName">
-
-            </ListBox>
+            <ListView ItemsSource="{Binding Sessions}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <DockPanel>
+                            <Image Source="{Binding Session.App.Icon}" Width="16" Height="16" Margin="0 0 4 0"></Image>
+                            <TextBlock Text="{Binding FullName}"></TextBlock>
+                        </DockPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
         </DockPanel>
         
     </Grid>

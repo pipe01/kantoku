@@ -9,7 +9,7 @@ namespace Kantoku.Master.ViewModels
 
         public string FullName => Session.Media == null ? "Loading..." : $"{Session.Media.Value.Author} - {Session.Media.Value.Title}";
 
-        private readonly ISession Session;
+        public ISession Session { get; }
 
         public SessionViewModel(ISession session)
         {

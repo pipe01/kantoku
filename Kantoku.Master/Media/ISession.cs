@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Kantoku.Master.Helpers.Fetchers;
+using System;
 using System.Threading.Tasks;
-using System.Windows.Media;
 
 namespace Kantoku.Master.Media
 {
@@ -10,7 +10,7 @@ namespace Kantoku.Master.Media
         event Action Updated;
 
         Guid ID { get; }
-        ImageSource Icon { get; }
+        AppInfo App { get; }
 
         TimeSpan Position { get; }
         bool IsPlaying { get; }
