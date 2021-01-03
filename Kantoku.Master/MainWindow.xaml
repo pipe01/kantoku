@@ -5,8 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Kantoku.Master"
         mc:Ignorable="d" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize"
+        Foreground="#1561C2"
         Title="Kantoku" Height="234" Width="324">
-    <Grid>
+    <Grid Margin="5">
         <Grid.RowDefinitions>
             <RowDefinition Height="22*"/>
             <RowDefinition Height="45*"/>
@@ -18,7 +19,7 @@
         </TextBlock>
 
         <StackPanel Grid.Row="1">
-            <Label HorizontalAlignment="Center">Enabled services:</Label>
+            <Label HorizontalAlignment="Center">Services:</Label>
 
             <ListBox></ListBox>
         </StackPanel>
