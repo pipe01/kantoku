@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Kantoku.Master.Services
+namespace Kantoku.Master.Media.Services
 {
     public interface IServiceManager
     {

@@ -1,4 +1,4 @@
-﻿using Kantoku.Master.Services;
+﻿using Kantoku.Master.Media.Services;
 using LightInject;
 using Serilog;
 using System;
