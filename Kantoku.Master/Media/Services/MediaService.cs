@@ -70,8 +70,7 @@ namespace Kantoku.Master.Media.Services
 
         private async Task StartSession(GlobalSystemMediaTransportControlsSession gsmtcSession)
         {
-            var session = new Session(gsmtcSession, Logger);
-            await session.LoadInfo();
+            var session = await Session.New(gsmtcSession, Logger);
 
             Logger.Debug("Started session with ID {ID}, app model {Model}", session.ID, gsmtcSession.SourceAppUserModelId);
 
@@ -98,7 +97,7 @@ namespace Kantoku.Master.Media.Services
             private readonly ILogger Logger;
             private GlobalSystemMediaTransportControlsSessionMediaProperties? MediaProperties;
 
-            public Session(GlobalSystemMediaTransportControlsSession gSMTCSession, ILogger rootLogger)
+            private Session(GlobalSystemMediaTransportControlsSession gSMTCSession, ILogger rootLogger)
             {
                 this.GSMTCSession = gSMTCSession;
                 this.ID = Guid.NewGuid();
@@ -106,6 +105,14 @@ namespace Kantoku.Master.Media.Services
 
                 GSMTCSession.MediaPropertiesChanged += GSMTCSession_MediaPropertiesChanged;
                 GSMTCSession.PlaybackInfoChanged += GSMTCSession_PlaybackInfoChanged;
+            }
+
+            public static async Task<Session> New(GlobalSystemMediaTransportControlsSession gsmtcSession, ILogger rootLogger)
+            {
+                var session = new Session(gsmtcSession, rootLogger);
+                await session.LoadInfo();
+
+                return session;
             }
 
             private async void GSMTCSession_MediaPropertiesChanged(GlobalSystemMediaTransportControlsSession sender, MediaPropertiesChangedEventArgs args)

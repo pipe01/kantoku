@@ -1,4 +1,5 @@
-﻿using Kantoku.Master.Media.Services;
+﻿using Kantoku.Master.Helpers.Fetchers;
+using Kantoku.Master.Media.Services;
 using Kantoku.Master.ViewModels;
 using LightInject;
 using Serilog;
@@ -36,6 +37,8 @@ namespace Kantoku.Master
             container.RegisterInstance(Log.Logger);
             container.RegisterInstance(Config.Load("config.yaml"));
             container.Register<IServiceManager, ServiceManager>();
+            container.Register<IAppInfoFetcher, AppInfoFetcher>();
+
             container.RegisterInstance(Dispatcher);
             container.RegisterSingleton<DashboardViewModel>();
             container.RegisterSingleton<MainWindow>();
