@@ -1,6 +1,7 @@
 ﻿using Kantoku.Master.Services;
 using LightInject;
 using Serilog;
+using System;
 using System.Windows;
 
 namespace Kantoku.Master
@@ -10,6 +11,11 @@ namespace Kantoku.Master
     /// </summary>
     public partial class App : Application
     {
+        static App()
+        {
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+        }
+
         protected override async void OnStartup(StartupEventArgs e)
         {
             Log.Logger = new LoggerConfiguration()
@@ -21,7 +27,8 @@ namespace Kantoku.Master
                 .CreateLogger();
 
             var container = new ServiceContainer();
-            container.RegisterSingleton(_ => Log.Logger);
+            container.RegisterInstance(Log.Logger);
+            container.RegisterInstance(Config.Load("config.yaml"));
             container.Register<IServiceManager, ServiceManager>();
 
             Log.Information("Kantoku starting up");
@@ -36,6 +43,11 @@ namespace Kantoku.Master
             Log.Information("Kantoku gracefully exiting");
 
             base.OnExit(e);
+        }
+
+        private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            Log.Fatal(e.ExceptionObject as Exception, "Unhandled exception");
         }
     }
 }
