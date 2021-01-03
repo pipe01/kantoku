@@ -4,9 +4,24 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Kantoku.Master"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        mc:Ignorable="d" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize"
+        Title="Kantoku" Height="234" Width="324">
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="22*"/>
+            <RowDefinition Height="45*"/>
+        </Grid.RowDefinitions>
 
+        <TextBlock Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center"
+                   FontSize="30">
+            Kantoku master
+        </TextBlock>
+
+        <StackPanel Grid.Row="1">
+            <Label HorizontalAlignment="Center">Enabled services:</Label>
+
+            <ListBox></ListBox>
+        </StackPanel>
+        
     </Grid>
 </Window>
