@@ -3,6 +3,7 @@ using LightInject;
 using Serilog;
 using System;
 using System.Windows;
+using TypeFinder;
 
 namespace Kantoku.Master
 {
@@ -26,10 +27,19 @@ namespace Kantoku.Master
                     rollOnFileSizeLimit: true)
                 .CreateLogger();
 
+            Log.Debug("Registering services");
+
             var container = new ServiceContainer();
             container.RegisterInstance(Log.Logger);
             container.RegisterInstance(Config.Load("config.yaml"));
             container.Register<IServiceManager, ServiceManager>();
+
+            foreach (var type in FindTypes.InCurrentAssembly.ThatInherit<IService>())
+            {
+                Log.Verbose("Found type {Name}", type.Name);
+
+                container.RegisterSingleton(typeof(IService), type);
+            }
 
             Log.Information("Kantoku starting up");
 

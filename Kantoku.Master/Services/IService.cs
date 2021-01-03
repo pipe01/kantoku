@@ -2,7 +2,7 @@
 
 namespace Kantoku.Master.Services
 {
-    public interface IServiceProvider
+    public interface IService
     {
         Task Start();
     }

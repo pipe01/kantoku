@@ -1,8 +1,5 @@
 ﻿using Serilog;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Kantoku.Master.Services
@@ -14,22 +11,24 @@ namespace Kantoku.Master.Services
 
     public class ServiceManager : IServiceManager
     {
-        private readonly IReadOnlyCollection<IServiceProvider> Providers;
+        private readonly IReadOnlyCollection<IService> Services;
         private readonly ILogger Logger;
 
-        public ServiceManager(IReadOnlyCollection<IServiceProvider> providers, ILogger logger)
+        public ServiceManager(IReadOnlyCollection<IService> services, ILogger logger)
         {
-            this.Providers = providers;
+            this.Services = services;
             this.Logger = logger.ForContext<ServiceManager>();
         }
 
         public async Task Start()
         {
-            Logger.Debug("Starting manager with {ProviderCount} providers", Providers.Count);
+            Logger.Debug("Starting manager with {ProviderCount} services", Services.Count);
 
-            foreach (var provider in Providers)
+            foreach (var svc in Services)
             {
-                await provider.Start();
+                Logger.Debug("Starting service {Name}", svc.GetType().Name);
+
+                await svc.Start();
             }
         }
     }
