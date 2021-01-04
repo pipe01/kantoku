@@ -38,7 +38,7 @@ namespace Kantoku.Master.Media.Services
 
         private void StartPipe()
         {
-            var pipe = new NamedPipeServerStream("Kantoku", PipeDirection.InOut, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
+            var pipe = new NamedPipeServerStream(Constants.PipeName, PipeDirection.InOut, NamedPipeServerStream.MaxAllowedServerInstances);
 
             Logger.Debug("Starting pipe {Number}", Servers.Count + 1);
 
@@ -46,12 +46,21 @@ namespace Kantoku.Master.Media.Services
 
             Task.Run(() =>
             {
-                var logger = Logger.ForContext("Pipe", Servers.Count);
+                var logger = Logger.For("Satellite " + Servers.Count);
 
                 logger.Debug("Waiting for connection");
                 pipe.WaitForConnection();
 
-                StartPipe();
+                pipe.Write(Encoding.UTF8.GetBytes("hello there"));
+
+                try
+                {
+                    StartPipe();
+                }
+                catch (Exception e)
+                {
+                    Logger.Error(e, "Failed to start new pipe");
+                }
 
                 try
                 {
@@ -71,14 +80,11 @@ namespace Kantoku.Master.Media.Services
 
         private void ReadLoop(NamedPipeServerStream pipe, ILogger logger)
         {
-            var buffer = new byte[4096];
+            var buffer = new byte[1024];
+            int read;
 
-            while (pipe.IsConnected)
+            while ((read = pipe.Read(buffer)) != 0)
             {
-                int read = pipe.Read(buffer);
-                if (read == 0)
-                    continue;
-
                 logger.Verbose("Read {Count} bytes", read);
             }
 

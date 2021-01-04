@@ -6,6 +6,7 @@ namespace Kantoku.Master
     public static class LoggerExtensions
     {
         public static ILogger For<T>(this ILogger logger) => logger.ForContext("SourceContext", PrettyName(typeof(T).Name));
+        public static ILogger For(this ILogger logger, string name) => logger.ForContext("SourceContext", name);
 
         private static string PrettyName(string name)
         {
