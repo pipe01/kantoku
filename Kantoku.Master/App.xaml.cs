@@ -24,7 +24,7 @@ namespace Kantoku.Master
         {
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Verbose()
-                .WriteTo.Debug()
+                .WriteTo.Debug(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}")
                 .WriteTo.File("logs/kantoku.txt",
                     rollingInterval: RollingInterval.Day,
                     rollOnFileSizeLimit: true)
@@ -47,7 +47,7 @@ namespace Kantoku.Master
             {
                 Log.Verbose("Found type {Name}", type.Name);
 
-                container.RegisterSingleton(typeof(IService), type);
+                container.RegisterSingleton(typeof(IService), type, type.Name);
             }
 
             Log.Information("Kantoku starting up");

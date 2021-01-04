@@ -22,7 +22,7 @@ namespace Kantoku.Master.Media.Services
 
         public MediaService(ILogger logger, IAppInfoFetcher appInfoFetcher)
         {
-            this.Logger = logger.ForContext<MediaService>();
+            this.Logger = logger.For<MediaService>();
             this.AppInfoFetcher = appInfoFetcher;
             this.Sessions = new Dictionary<GSMTCSession, Session>(new SessionComparer());
         }

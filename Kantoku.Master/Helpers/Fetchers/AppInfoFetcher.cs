@@ -21,7 +21,7 @@ namespace Kantoku.Master.Helpers.Fetchers
 
         public AppInfoFetcher(ILogger logger)
         {
-            this.Logger = logger.ForContext<AppInfoFetcher>();
+            this.Logger = logger.For<AppInfoFetcher>();
         }
 
         public Task<AppInfo> FetchInfo(string appId)

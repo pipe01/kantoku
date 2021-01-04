@@ -27,7 +27,7 @@ namespace Kantoku.Master.Media.Services
         public ServiceManager(IReadOnlyCollection<IService> services, ILogger logger)
         {
             this.Services = services;
-            this.Logger = logger.ForContext<ServiceManager>();
+            this.Logger = logger.For<ServiceManager>();
         }
 
         public async Task Start()
