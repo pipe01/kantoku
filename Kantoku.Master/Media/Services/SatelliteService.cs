@@ -38,7 +38,7 @@ namespace Kantoku.Master.Media.Services
 
         private void StartPipe()
         {
-            var pipe = new NamedPipeServerStream(Constants.PipeName, PipeDirection.InOut, NamedPipeServerStream.MaxAllowedServerInstances);
+            var pipe = new NamedPipeServerStream(Satellite.PipeName, PipeDirection.InOut, NamedPipeServerStream.MaxAllowedServerInstances);
 
             Logger.Debug("Starting pipe {Number}", Servers.Count + 1);
 

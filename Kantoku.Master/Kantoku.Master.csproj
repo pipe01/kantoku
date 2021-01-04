@@ -24,6 +24,4 @@
     </None>
   </ItemGroup>
 
-  <Import Project="..\Kantoku.Shared\Kantoku.Shared.projitems" Label="Shared" />
-
 </Project>

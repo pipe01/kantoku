@@ -9,8 +9,6 @@
         <OutputType>WinExe</OutputType>
     </PropertyGroup>
 
-    <Import Project="..\Kantoku.Shared\Kantoku.Shared.projitems" Label="Shared" />
-
     <ItemGroup>
       <PackageReference Include="MessagePack" Version="2.2.85" />
     </ItemGroup>
