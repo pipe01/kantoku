@@ -9,9 +9,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kantoku.Mobile", "Kantoku.M
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kantoku.Master", "Kantoku.Master\Kantoku.Master.csproj", "{8DE547BC-2326-4E51-858E-E77B38CB2D6D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kantoku.Satellite", "Kantoku.Satellite\Kantoku.Satellite.csproj", "{876954A0-1508-42CD-86B6-BE7D23FBD17D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kantoku.Satellite", "Kantoku.Satellite\Kantoku.Satellite.csproj", "{876954A0-1508-42CD-86B6-BE7D23FBD17D}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Kantoku.Shared", "Kantoku.Shared\Kantoku.Shared.shproj", "{F280CB59-1CD1-4D4E-8C9D-C48C0F8FD3C1}"
 EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Kantoku.Shared\Kantoku.Shared.projitems*{876954a0-1508-42cd-86b6-be7d23fbd17d}*SharedItemsImports = 5
+		Kantoku.Shared\Kantoku.Shared.projitems*{8de547bc-2326-4e51-858e-e77b38cb2d6d}*SharedItemsImports = 5
+		Kantoku.Shared\Kantoku.Shared.projitems*{f280cb59-1cd1-4d4e-8c9d-c48c0f8fd3c1}*SharedItemsImports = 13
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU

@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.IO.Pipes;
+using System.Threading;
 
 namespace Kantoku.Satellite
 {
@@ -6,6 +7,8 @@ namespace Kantoku.Satellite
     {
         static void Main(string[] args)
         {
+            
+
             Thread.Sleep(Timeout.Infinite);
         }
     }
