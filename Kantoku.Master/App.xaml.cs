@@ -17,11 +17,6 @@ namespace Kantoku.Master
     /// </summary>
     public partial class App : Application
     {
-        static App()
-        {
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-        }
-
         protected override void OnStartup(StartupEventArgs e)
         {
             File.WriteAllText("test.txt", string.Join('\n', e.Args));
@@ -40,6 +35,8 @@ namespace Kantoku.Master
                     rollingInterval: RollingInterval.Day,
                     rollOnFileSizeLimit: true)
                 .CreateLogger();
+
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
             Log.Information("===========================================");
             Log.Debug("Registering services");

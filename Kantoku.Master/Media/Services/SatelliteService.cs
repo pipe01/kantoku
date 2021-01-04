@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.IO.Pipes;
 using System.Text;
 using System.Threading.Tasks;
@@ -41,8 +42,6 @@ namespace Kantoku.Master.Media.Services
                 logger.Debug("Waiting for connection");
                 pipe.WaitForConnection();
 
-                pipe.Write(Encoding.UTF8.GetBytes("hello there"));
-
                 try
                 {
                     StartPipe();
@@ -71,14 +70,43 @@ namespace Kantoku.Master.Media.Services
         private void ReadLoop(NamedPipeServerStream pipe, ILogger logger)
         {
             var buffer = new byte[1024];
-            int read;
+            var sizeBuffer = new byte[4];
+            int read, messageSize;
 
-            while ((read = pipe.Read(buffer)) != 0)
+            var message = new MemoryStream();
+
+            while (true)
             {
-                logger.Verbose("Read {Count} bytes", read);
+                if (pipe.Read(sizeBuffer) == 0)
+                    break;
+
+                messageSize = BitConverter.ToInt32(sizeBuffer);
+
+                logger.Verbose($"Message size is {messageSize} bytes");
+                logger.Verbose(BitConverter.ToString(sizeBuffer));
+
+                while (message.Length < messageSize)
+                {
+                    if ((read = pipe.Read(buffer)) == 0)
+                        return;
+
+                    logger.Verbose($"Read {read} bytes from browser");
+                    logger.Verbose(BitConverter.ToString(sizeBuffer));
+
+                    message.Write(buffer, 0, read);
+                }
+
+                message.Position = 0;
+                HandleMessage(Encoding.UTF8.GetString(message.ToArray()));
+                message.SetLength(0);
             }
 
             logger.Verbose("Exited read loop");
+        }
+
+        private void HandleMessage(string data)
+        {
+            Logger.Debug("Handling message {Message}", data);
         }
     }
 }
