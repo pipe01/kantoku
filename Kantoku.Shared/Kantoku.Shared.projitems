@@ -9,6 +9,7 @@
     <Import_RootNamespace>Kantoku.Shared</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)Message.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Constants.cs" />
+    <Compile Include="..\Kantoku.Shared\IMessage.cs" />
   </ItemGroup>
 </Project>

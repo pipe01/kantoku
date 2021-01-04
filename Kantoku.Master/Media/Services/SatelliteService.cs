@@ -1,12 +1,16 @@
 ﻿using Kantoku.Shared;
 using MessagePack;
 using Serilog;
+using Serilog.Context;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,6 +21,7 @@ namespace Kantoku.Master.Media.Services
     {
         public event EventHandler<ISession>? SessionStarted;
 
+        private readonly IList<NamedPipeServerStream> Servers = new List<NamedPipeServerStream>();
         private readonly ILogger Logger;
 
         public SatelliteService(ILogger logger)
@@ -26,38 +31,58 @@ namespace Kantoku.Master.Media.Services
 
         public Task Start()
         {
-            var server = new NamedPipeServerStream("Kantoku", PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
-
-            new Thread(ReadLoop)
-            {
-                IsBackground = true,
-                Name = "Satellites thread"
-            }.Start(server);
+            StartPipe();
 
             return Task.CompletedTask;
         }
 
-        private void ReadLoop(object? obj)
+        private void StartPipe()
         {
-            Debug.Assert(obj != null);
+            var pipe = new NamedPipeServerStream("Kantoku", PipeDirection.InOut, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
 
-            var pipe = (NamedPipeServerStream)obj;
+            Logger.Debug("Starting pipe {Number}", Servers.Count + 1);
 
-            var buffer = new byte[Message.MaxMessageSize];
+            Servers.Add(pipe);
 
-            while (true)
+            Task.Run(() =>
             {
-                if (!pipe.IsConnected)
+                var logger = Logger.ForContext("Pipe", Servers.Count);
+
+                logger.Debug("Waiting for connection");
+                pipe.WaitForConnection();
+
+                StartPipe();
+
+                try
                 {
-                    Logger.Debug("No satellites connected, waiting for connection");
+                    logger.Debug("Starting read loop");
 
-                    pipe.WaitForConnection();
+                    ReadLoop(pipe, logger);
                 }
+                finally
+                {
+                    logger.Debug("Removing pipe");
 
+                    Servers.Remove(pipe);
+                    pipe.Dispose();
+                }
+            });
+        }
+
+        private void ReadLoop(NamedPipeServerStream pipe, ILogger logger)
+        {
+            var buffer = new byte[4096];
+
+            while (pipe.IsConnected)
+            {
                 int read = pipe.Read(buffer);
+                if (read == 0)
+                    continue;
 
-                var message = MessagePackSerializer.Deserialize<Message>(buffer.AsMemory(0, read));
+                logger.Verbose("Read {Count} bytes", read);
             }
+
+            logger.Verbose("Exited read loop");
         }
     }
 }
