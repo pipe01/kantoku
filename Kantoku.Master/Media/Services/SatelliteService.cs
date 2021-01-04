@@ -1,18 +1,8 @@
-﻿using Kantoku.Shared;
-using MessagePack;
-using Serilog;
-using Serilog.Context;
+﻿using Serilog;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.IO.Pipes;
-using System.Linq;
-using System.Net;
-using System.Net.Sockets;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Kantoku.Master.Media.Services

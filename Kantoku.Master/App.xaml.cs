@@ -1,9 +1,11 @@
-﻿using Kantoku.Master.Helpers.Fetchers;
+﻿using Kantoku.Master.Helpers;
+using Kantoku.Master.Helpers.Fetchers;
 using Kantoku.Master.Media.Services;
 using Kantoku.Master.ViewModels;
 using LightInject;
 using Serilog;
 using System;
+using System.IO;
 using System.Windows;
 using System.Windows.Threading;
 using TypeFinder;
@@ -22,6 +24,8 @@ namespace Kantoku.Master
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            File.WriteAllText("test.txt", string.Join('\n', e.Args));
+
             if (Satellite.IsAppSatellite(e.Args))
             {
                 new Satellite().Run();
@@ -56,6 +60,8 @@ namespace Kantoku.Master
 
                 container.RegisterSingleton(typeof(IService), type, type.Name);
             }
+
+            RegistryHelper.RegisterNativeHost();
 
             Log.Information("Kantoku starting up");
 
