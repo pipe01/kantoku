@@ -1,0 +1,12 @@
+{
+    "scripts": {
+        "dev": "parcel watch background.ts content.ts --out-dir ../dist"
+    },
+    "devDependencies": {
+        "parcel-bundler": "^1.12.4",
+        "typescript": "^4.1.3"
+    },
+    "dependencies": {
+        "webextension-polyfill-ts": "^0.22.0"
+    }
+}

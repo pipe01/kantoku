@@ -8,6 +8,13 @@
     "48": "icons/message.svg"
   },
 
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["dist/content.js"]
+    }
+  ],
+
   "browser_specific_settings": {
     "gecko": {
       "id": "kantoku@pipe01.net",
@@ -16,7 +23,7 @@
   },
 
   "background": {
-    "scripts": ["background.js"]
+    "scripts": ["dist/background.js"]
   },
 
   "browser_action": {
