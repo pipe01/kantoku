@@ -33,12 +33,12 @@
 
                 <ListView.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="Play" Command="{Binding Play}"></MenuItem>
-                        <MenuItem Header="Pause" Command="{Binding Pause}"></MenuItem>
-                        <MenuItem Header="Stop" Command="{Binding Stop}"></MenuItem>
+                        <MenuItem Header="Play" Command="{Binding Selected.Play}"></MenuItem>
+                        <MenuItem Header="Pause" Command="{Binding Selected.Pause}"></MenuItem>
+                        <MenuItem Header="Stop" Command="{Binding Selected.Stop}"></MenuItem>
                         <Separator/>
-                        <MenuItem Header="Previous" Command="{Binding Previous}"></MenuItem>
-                        <MenuItem Header="Next" Command="{Binding Next}"></MenuItem>
+                        <MenuItem Header="Previous" Command="{Binding Selected.Previous}"></MenuItem>
+                        <MenuItem Header="Next" Command="{Binding Selected.Next}"></MenuItem>
                     </ContextMenu>
                 </ListView.ContextMenu>
             </ListView>
