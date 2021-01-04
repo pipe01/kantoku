@@ -21,7 +21,7 @@
         <DockPanel Grid.Row="1">
             <Label DockPanel.Dock="Top" HorizontalAlignment="Center">Sessions:</Label>
 
-            <ListView ItemsSource="{Binding Sessions}">
+            <ListView ItemsSource="{Binding Sessions}" SelectedItem="{Binding Selected}" ContextMenuOpening="ContextMenu_ContextMenuOpening" SelectionChanged="ListView_SelectionChanged">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <DockPanel>
@@ -30,6 +30,17 @@
                         </DockPanel>
                     </DataTemplate>
                 </ListView.ItemTemplate>
+
+                <ListView.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Play" Command="{Binding Play}"></MenuItem>
+                        <MenuItem Header="Pause" Command="{Binding Pause}"></MenuItem>
+                        <MenuItem Header="Stop" Command="{Binding Stop}"></MenuItem>
+                        <Separator/>
+                        <MenuItem Header="Previous" Command="{Binding Previous}"></MenuItem>
+                        <MenuItem Header="Next" Command="{Binding Next}"></MenuItem>
+                    </ContextMenu>
+                </ListView.ContextMenu>
             </ListView>
         </DockPanel>
         
