@@ -55,6 +55,7 @@ namespace Kantoku.Master.Helpers.Fetchers
             var icon = iconEx.GetIcon(0);
             var iconBmp = icon.ToBitmap();
             var iconSource = Imaging.CreateBitmapSourceFromHBitmap(iconBmp.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+            iconSource.Freeze();
 
             return Task.FromResult(new AppInfo(appName, iconSource));
         }

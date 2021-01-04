@@ -11,7 +11,7 @@ namespace Kantoku.Master.ViewModels
         public ObservableCollection<SessionViewModel> Sessions { get; set; } = new ObservableCollection<SessionViewModel>();
 
         private readonly IServiceManager ServiceManager;
-        private Dispatcher Dispatcher;
+        private readonly Dispatcher Dispatcher;
 
         public DashboardViewModel(IServiceManager serviceManager, Dispatcher dispatcher)
         {
@@ -28,7 +28,11 @@ namespace Kantoku.Master.ViewModels
 
         private void ServiceManager_SessionStarted(object? sender, ISession e)
         {
-            Dispatcher.Invoke(() => Sessions.Add(new SessionViewModel(e)));
+            var vm = new SessionViewModel(e);
+
+            Dispatcher.Invoke(() => Sessions.Add(vm));
+
+            e.Closed += () => Dispatcher.Invoke(() => Sessions.Remove(vm));
         }
     }
 }

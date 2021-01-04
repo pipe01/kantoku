@@ -1,5 +1,6 @@
 ﻿using Kantoku.Master.Media;
 using System.ComponentModel;
+using System.Windows.Threading;
 
 namespace Kantoku.Master.ViewModels
 {
