@@ -12,7 +12,7 @@ namespace Kantoku.Master.Helpers.Fetchers
 {
     public interface IAppInfoFetcher
     {
-        Task<AppInfo> FetchInfo(string appId);
+        AppInfo FetchInfo(string appId);
     }
 
     public sealed class AppInfoFetcher : IAppInfoFetcher
@@ -24,7 +24,7 @@ namespace Kantoku.Master.Helpers.Fetchers
             this.Logger = logger.For<AppInfoFetcher>();
         }
 
-        public Task<AppInfo> FetchInfo(string appId)
+        public AppInfo FetchInfo(string appId)
         {
             Logger.Debug("Fetching app info for {App}", appId);
 
@@ -36,7 +36,7 @@ namespace Kantoku.Master.Helpers.Fetchers
 
         private static bool IsWin32(string appId) => Path.GetExtension(appId).Equals(".exe", StringComparison.OrdinalIgnoreCase);
 
-        private Task<AppInfo> FetchWin32(string appId)
+        private AppInfo FetchWin32(string appId)
         {
             Logger.Debug("App is win32");
 
@@ -57,12 +57,12 @@ namespace Kantoku.Master.Helpers.Fetchers
             var iconSource = Imaging.CreateBitmapSourceFromHBitmap(iconBmp.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
             iconSource.Freeze();
 
-            return Task.FromResult(new AppInfo(appName, iconSource));
+            return new AppInfo(appName, iconSource);
         }
 
-        private Task<AppInfo> FetchModern(string appId)
+        private AppInfo FetchModern(string appId)
         {
-            return Task.FromResult(new AppInfo(appId, new BitmapImage()));
+            return new AppInfo(appId, new BitmapImage());
         }
     }
 }

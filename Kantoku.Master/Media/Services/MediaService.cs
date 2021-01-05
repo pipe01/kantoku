@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Windows.Media.Control;
@@ -62,6 +63,14 @@ namespace Kantoku.Master.Media.Services
                     await StartSession(ses);
                 }
             }
+
+            foreach (var ses in Sessions)
+            {
+                if (!sessions.Contains(ses.Key))
+                {
+
+                }
+            }
         }
 
         private async Task StartSession(GSMTCSession gsmtcSession)
@@ -115,7 +124,7 @@ namespace Kantoku.Master.Media.Services
 
             public static async Task<Session> CreateNew(GSMTCSession gsmtcSession, ILogger rootLogger, IAppInfoFetcher appInfoFetcher)
             {
-                var appInfo = await appInfoFetcher.FetchInfo(gsmtcSession.SourceAppUserModelId);
+                var appInfo = appInfoFetcher.FetchInfo(gsmtcSession.SourceAppUserModelId);
 
                 var session = new Session(gsmtcSession, rootLogger, appInfo);
                 await session.LoadInfo();
