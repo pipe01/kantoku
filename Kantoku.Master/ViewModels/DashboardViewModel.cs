@@ -1,6 +1,7 @@
 ﻿using Kantoku.Master.Media;
 using Kantoku.Master.Media.Services;
 using System.Collections.ObjectModel;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 
@@ -13,12 +14,12 @@ namespace Kantoku.Master.ViewModels
         public SessionViewModel? Selected { get; set; }
 
         private readonly IServiceManager ServiceManager;
-        private readonly Dispatcher Dispatcher;
+        private readonly SynchronizationContext SynchronizationContext;
 
-        public DashboardViewModel(IServiceManager serviceManager, Dispatcher dispatcher)
+        public DashboardViewModel(IServiceManager serviceManager, SynchronizationContext synchronizationContext)
         {
             this.ServiceManager = serviceManager;
-            this.Dispatcher = dispatcher;
+            this.SynchronizationContext = synchronizationContext;
         }
 
         public async Task Start()
@@ -32,9 +33,9 @@ namespace Kantoku.Master.ViewModels
         {
             var vm = new SessionViewModel(e);
 
-            Dispatcher.Invoke(() => Sessions.Add(vm));
+            SynchronizationContext.Send(() => Sessions.Add(vm));
 
-            e.Closed += () => Dispatcher.Invoke(() => Sessions.Remove(vm));
+            e.Closed += () => SynchronizationContext.Send(() => Sessions.Remove(vm));
         }
     }
 }

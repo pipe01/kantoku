@@ -62,7 +62,10 @@ namespace Kantoku.Master.Helpers.Fetchers
 
         private AppInfo FetchModern(string appId)
         {
-            return new AppInfo(appId, new BitmapImage());
+            var img = new BitmapImage();
+            img.Freeze();
+
+            return new AppInfo(appId, img);
         }
     }
 }

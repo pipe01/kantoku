@@ -193,7 +193,7 @@ namespace Kantoku.Master.Media.Services
             private Session(ILogger rootLogger, NamedPipeServerStream pipe, AppInfo app)
             {
                 this.ID = Guid.NewGuid();
-                this.Logger = rootLogger.For("Session " + ID);
+                this.Logger = rootLogger.For("Satellite Session " + ID);
                 this.Pipe = pipe;
                 this.App = app;
             }

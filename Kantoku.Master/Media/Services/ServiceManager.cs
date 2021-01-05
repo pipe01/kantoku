@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Kantoku.Master.Media.Services
@@ -21,13 +22,15 @@ namespace Kantoku.Master.Media.Services
 
         private readonly IReadOnlyCollection<IService> Services;
         private readonly ILogger Logger;
+        private readonly SynchronizationContext SynchronizationContext;
 
         public event EventHandler<ISession> SessionStarted = delegate { };
 
-        public ServiceManager(IReadOnlyCollection<IService> services, ILogger logger)
+        public ServiceManager(IReadOnlyCollection<IService> services, ILogger logger, SynchronizationContext synchronizationContext)
         {
             this.Services = services;
             this.Logger = logger.For<ServiceManager>();
+            this.SynchronizationContext = synchronizationContext;
         }
 
         public async Task Start()
@@ -50,7 +53,7 @@ namespace Kantoku.Master.Media.Services
 
             SessionsInner.Add(session.ID, session);
 
-            SessionStarted(this, session);
+            SynchronizationContext.Post(() => SessionStarted(this, session));
         }
     }
 }

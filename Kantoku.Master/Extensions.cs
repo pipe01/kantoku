@@ -3,6 +3,7 @@ using System;
 using System.Buffers;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 
 namespace Kantoku.Master
 {
@@ -49,5 +50,13 @@ namespace Kantoku.Master
                 throw new ArgumentNullException(nameof(document));
             return document.RootElement.ToObject<T>(options);
         }
+    }
+
+    public static class SynchronizationContextExtensions
+    {
+        public static void Post(this SynchronizationContext context, Action callback)
+            => context.Post(_ => callback(), null);
+        public static void Send(this SynchronizationContext context, Action callback)
+            => context.Send(_ => callback(), null);
     }
 }

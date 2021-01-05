@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Media.Control;
 
@@ -21,13 +22,16 @@ namespace Kantoku.Master.Media.Services
         private readonly ILogger Logger;
         private readonly IAppInfoFetcher AppInfoFetcher;
         private readonly IDictionary<GSMTCSession, Session> Sessions;
+        private readonly SynchronizationContext SynchronizationContext;
+
         private GlobalSystemMediaTransportControlsSessionManager? Manager;
 
-        public MediaService(ILogger logger, IAppInfoFetcher appInfoFetcher)
+        public MediaService(ILogger logger, IAppInfoFetcher appInfoFetcher, SynchronizationContext synchronizationContext)
         {
             this.Logger = logger.For<MediaService>();
             this.AppInfoFetcher = appInfoFetcher;
             this.Sessions = new Dictionary<GSMTCSession, Session>(new SessionComparer());
+            this.SynchronizationContext = synchronizationContext;
         }
 
         public async Task Start()
@@ -52,23 +56,23 @@ namespace Kantoku.Master.Media.Services
 
             Logger.Verbose("Sessions change detected");
 
-            var sessions = Manager.GetSessions();
+            var sessions = Manager.GetSessions().ToDictionary(o => o, new SessionComparer());
 
             foreach (var ses in sessions)
             {
-                if (!Sessions.TryGetValue(ses, out _))
+                if (!Sessions.TryGetValue(ses.Value, out _))
                 {
                     Logger.Verbose("Starting session");
 
-                    await StartSession(ses);
+                    await StartSession(ses.Value);
                 }
             }
 
             foreach (var ses in Sessions)
             {
-                if (!sessions.Contains(ses.Key))
+                if (!sessions.ContainsKey(ses.Key))
                 {
-
+                    ses.Value.Close();
                 }
             }
         }
@@ -88,7 +92,7 @@ namespace Kantoku.Master.Media.Services
             };
 
             Sessions.Add(gsmtcSession, session);
-            SessionStarted(this, session);
+            SynchronizationContext.Post(() => SessionStarted(this, session));
         }
 
         private class Session : ISession
@@ -115,7 +119,7 @@ namespace Kantoku.Master.Media.Services
             {
                 this.GSMTCSession = gSMTCSession;
                 this.ID = Guid.NewGuid();
-                this.Logger = rootLogger.ForContext("Session", ID);
+                this.Logger = rootLogger.For("GSMTC Session " + ID);
                 this.App = app;
 
                 GSMTCSession.MediaPropertiesChanged += GSMTCSession_MediaPropertiesChanged;
@@ -143,21 +147,24 @@ namespace Kantoku.Master.Media.Services
 
             private void GSMTCSession_PlaybackInfoChanged(GSMTCSession sender, PlaybackInfoChangedEventArgs args)
             {
-                Logger.Verbose("Playback info changed");
+                var status = GSMTCSession.GetPlaybackInfo().PlaybackStatus;
+
+                Logger.Verbose("Playback info changed, status: {Status}", status);
 
                 OnPropertyChanged(nameof(IsPlaying));
 
-                if (GSMTCSession.GetPlaybackInfo().PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Closed && !IsClosed)
+                if (status == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Closed && !IsClosed)
                 {
-                    Logger.Debug("Closing session");
+                    Logger.Debug("GSMTC session was closed");
 
-                    IsClosed = true;
-                    Closed();
+                    Close();
                 }
             }
 
             public void Dispose()
             {
+                Logger.Verbose("Disposing session");
+
                 GSMTCSession.MediaPropertiesChanged -= GSMTCSession_MediaPropertiesChanged;
                 GSMTCSession.PlaybackInfoChanged -= GSMTCSession_PlaybackInfoChanged;
             }
@@ -169,6 +176,14 @@ namespace Kantoku.Master.Media.Services
                 var props = await GSMTCSession.TryGetMediaPropertiesAsync();
 
                 Media = new MediaInfo(props.Title, props.Artist);
+            }
+
+            public void Close()
+            {
+                Logger.Debug("Closing session");
+
+                IsClosed = true;
+                Closed();
             }
 
             public async Task Pause()
