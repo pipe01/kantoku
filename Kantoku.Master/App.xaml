@@ -4,6 +4,6 @@
              xmlns:s="clr-namespace:System;assembly=mscorlib"
              xmlns:local="clr-namespace:Kantoku.Master">
     <Application.Resources>
-        <s:Boolean x:Key="True">True</s:Boolean>
+        <BitmapImage x:Key="Pause" UriSource="/Images/pause.png" />
     </Application.Resources>
 </Application>
