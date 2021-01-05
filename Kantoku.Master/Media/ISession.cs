@@ -1,13 +1,13 @@
 ﻿using Kantoku.Master.Helpers.Fetchers;
 using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 
 namespace Kantoku.Master.Media
 {
-    public interface ISession : IDisposable
+    public interface ISession : IDisposable, INotifyPropertyChanged
     {
         event Action Closed;
-        event Action Updated;
 
         Guid ID { get; }
         AppInfo App { get; }

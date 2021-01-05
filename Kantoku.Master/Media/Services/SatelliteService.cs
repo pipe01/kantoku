@@ -2,6 +2,7 @@
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
@@ -184,7 +185,7 @@ namespace Kantoku.Master.Media.Services
             public MediaInfo? Media { get; private set; }
 
             public event Action Closed = delegate { };
-            public event Action Updated = delegate { };
+            public event PropertyChangedEventHandler? PropertyChanged;
 
             private readonly ILogger Logger;
             private readonly NamedPipeServerStream Pipe;

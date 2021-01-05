@@ -3,7 +3,9 @@ using Kantoku.Master.Helpers.Fetchers;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Windows.Media.Control;
 
@@ -64,7 +66,7 @@ namespace Kantoku.Master.Media.Services
 
         private async Task StartSession(GSMTCSession gsmtcSession)
         {
-            var session = await Session.New(gsmtcSession, Logger, AppInfoFetcher);
+            var session = await Session.CreateNew(gsmtcSession, Logger, AppInfoFetcher);
 
             Logger.Debug("Started session with ID {ID}, app ID {Model}, hash {Hash}", session.ID, gsmtcSession.SourceAppUserModelId, gsmtcSession.GetHashCode());
 
@@ -86,7 +88,7 @@ namespace Kantoku.Master.Media.Services
 
             public bool IsPlaying => GSMTCSession.GetPlaybackInfo().PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing;
 
-            public MediaInfo? Media => MediaProperties == null ? null : new MediaInfo(MediaProperties.Title, MediaProperties.Artist);
+            public MediaInfo? Media { get; private set; }
 
             public Guid ID { get; }
 
@@ -94,11 +96,11 @@ namespace Kantoku.Master.Media.Services
 
             public event Action Closed = delegate { };
             public event Action Updated = delegate { };
+            public event PropertyChangedEventHandler? PropertyChanged;
 
             private readonly GSMTCSession GSMTCSession;
             private readonly ILogger Logger;
 
-            private GlobalSystemMediaTransportControlsSessionMediaProperties? MediaProperties;
             private bool IsClosed;
 
             private Session(GSMTCSession gSMTCSession, ILogger rootLogger, AppInfo app)
@@ -112,7 +114,7 @@ namespace Kantoku.Master.Media.Services
                 GSMTCSession.PlaybackInfoChanged += GSMTCSession_PlaybackInfoChanged;
             }
 
-            public static async Task<Session> New(GSMTCSession gsmtcSession, ILogger rootLogger, IAppInfoFetcher appInfoFetcher)
+            public static async Task<Session> CreateNew(GSMTCSession gsmtcSession, ILogger rootLogger, IAppInfoFetcher appInfoFetcher)
             {
                 var appInfo = await appInfoFetcher.FetchInfo(gsmtcSession.SourceAppUserModelId);
 
@@ -121,6 +123,8 @@ namespace Kantoku.Master.Media.Services
 
                 return session;
             }
+
+            private void OnPropertyChanged(string prop) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
 
             private async void GSMTCSession_MediaPropertiesChanged(GSMTCSession sender, MediaPropertiesChangedEventArgs args)
             {
@@ -132,6 +136,8 @@ namespace Kantoku.Master.Media.Services
             private void GSMTCSession_PlaybackInfoChanged(GSMTCSession sender, PlaybackInfoChangedEventArgs args)
             {
                 Logger.Verbose("Playback info changed");
+
+                OnPropertyChanged(nameof(IsPlaying));
 
                 if (GSMTCSession.GetPlaybackInfo().PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Closed && !IsClosed)
                 {
@@ -152,8 +158,9 @@ namespace Kantoku.Master.Media.Services
             {
                 Logger.Verbose("Reloading media properties");
 
-                MediaProperties = await GSMTCSession.TryGetMediaPropertiesAsync();
-                Updated();
+                var props = await GSMTCSession.TryGetMediaPropertiesAsync();
+                Media = new MediaInfo(props.Title, props.Artist);
+                OnPropertyChanged(nameof(Media));
             }
 
             public async Task Pause()

@@ -1,9 +1,7 @@
 ﻿using Kantoku.Master.Helpers;
 using Kantoku.Master.Media;
 using System.ComponentModel;
-using System.Windows;
 using System.Windows.Input;
-using System.Windows.Threading;
 
 namespace Kantoku.Master.ViewModels
 {
@@ -24,8 +22,6 @@ namespace Kantoku.Master.ViewModels
         public SessionViewModel(ISession session)
         {
             this.Session = session;
-
-            session.Updated += () => PropertyChanged(this, new PropertyChangedEventArgs(nameof(FullName)));
 
             Pause = new ActionCommand(() => Session.Pause());
             Play = new ActionCommand(() => Session.Play());

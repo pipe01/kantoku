@@ -4,8 +4,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Kantoku.Master"
+        xmlns:helpers="clr-namespace:Kantoku.Master.Helpers"
         mc:Ignorable="d" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize" Loaded="Window_Loaded"
         Title="Kantoku" Height="234" Width="324">
+
     <Grid Margin="15">
         <Grid.RowDefinitions>
             <RowDefinition Height="22*"/>
@@ -26,6 +28,7 @@
                         <DockPanel>
                             <Image Source="{Binding Session.App.Icon}" Width="16" Height="16" Margin="0 0 4 0"></Image>
                             <TextBlock Text="{Binding FullName}"></TextBlock>
+                            <TextBlock Text="Paused" Margin="3 0 0 0" Visibility="{Binding Session.IsPlaying, Converter={helpers:BoolToVisibilityConverter}, ConverterParameter='true'}"></TextBlock>
                         </DockPanel>
                     </DataTemplate>
                 </ListView.ItemTemplate>
