@@ -208,7 +208,7 @@ namespace Kantoku.Master.Media.Services
                     PropertyNameCaseInsensitive = true
                 }) ?? throw new Exception("Invalid media data");
 
-                rootLogger.Debug("Media info: {Info}", info);
+                rootLogger.Verbose("Media info: {Info}", info);
 
                 var icon = new BitmapImage(new Uri(info.IconUrl ?? ""));
 

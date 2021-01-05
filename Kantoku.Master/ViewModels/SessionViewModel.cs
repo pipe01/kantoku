@@ -23,11 +23,21 @@ namespace Kantoku.Master.ViewModels
         {
             this.Session = session;
 
+            Session.PropertyChanged += Session_PropertyChanged;
+
             Pause = new ActionCommand(() => Session.Pause());
             Play = new ActionCommand(() => Session.Play());
             Stop = new ActionCommand(() => Session.Stop());
             Previous = new ActionCommand(() => Session.Previous());
             Next = new ActionCommand(() => Session.Next());
+        }
+
+        private void OnPropertyChanged(string prop) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
+
+        private void Session_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ISession.Media))
+                OnPropertyChanged(nameof(FullName));
         }
     }
 }

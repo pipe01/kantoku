@@ -60,9 +60,9 @@ namespace Kantoku.Master.Helpers.Fetchers
             return Task.FromResult(new AppInfo(appName, iconSource));
         }
 
-        private async Task<AppInfo> FetchModern(string appId)
+        private Task<AppInfo> FetchModern(string appId)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(new AppInfo(appId, new BitmapImage()));
         }
     }
 }

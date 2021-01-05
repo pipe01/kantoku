@@ -95,7 +95,6 @@ namespace Kantoku.Master.Media.Services
             public AppInfo App { get; }
 
             public event Action Closed = delegate { };
-            public event Action Updated = delegate { };
             public event PropertyChangedEventHandler? PropertyChanged;
 
             private readonly GSMTCSession GSMTCSession;
@@ -159,8 +158,8 @@ namespace Kantoku.Master.Media.Services
                 Logger.Verbose("Reloading media properties");
 
                 var props = await GSMTCSession.TryGetMediaPropertiesAsync();
+
                 Media = new MediaInfo(props.Title, props.Artist);
-                OnPropertyChanged(nameof(Media));
             }
 
             public async Task Pause()

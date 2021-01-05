@@ -33,7 +33,7 @@ namespace Kantoku.Master
         }
     }
 
-    public static partial class JsonExtensions
+    public static class JsonExtensions
     {
         public static T? ToObject<T>(this JsonElement element, JsonSerializerOptions? options = null)
         {
