@@ -1,12 +1,15 @@
 {
     "scripts": {
-        "dev": "parcel watch background.ts content.ts --out-dir ../dist"
+        "dev": "parcel watch background.ts content.ts --out-dir ../dist --no-hmr"
     },
     "devDependencies": {
         "parcel-bundler": "^1.12.4",
         "typescript": "^4.1.3"
     },
     "dependencies": {
+        "@types/md5": "^2.2.1",
+        "babel-polyfill": "^6.26.0",
+        "md5": "^2.3.0",
         "webextension-polyfill-ts": "^0.22.0"
     }
 }

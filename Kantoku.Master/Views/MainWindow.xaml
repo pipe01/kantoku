@@ -4,8 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Kantoku.Master"
-        mc:Ignorable="d" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize"
-        Foreground="#1561C2" Loaded="Window_Loaded"
+        mc:Ignorable="d" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize" Loaded="Window_Loaded"
         Title="Kantoku" Height="234" Width="324">
     <Grid Margin="15">
         <Grid.RowDefinitions>
@@ -14,7 +13,7 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center"
-                   FontSize="30">
+                   FontSize="30" Foreground="#1561C2">
             Kantoku master
         </TextBlock>
 

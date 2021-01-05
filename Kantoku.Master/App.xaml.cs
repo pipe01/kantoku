@@ -6,6 +6,7 @@ using LightInject;
 using Serilog;
 using System;
 using System.IO;
+using System.Threading;
 using System.Windows;
 using TypeFinder;
 
@@ -47,6 +48,7 @@ namespace Kantoku.Master
             container.Register<IAppInfoFetcher, AppInfoFetcher>();
 
             container.RegisterInstance(Dispatcher);
+            container.RegisterInstance(SynchronizationContext.Current);
             container.RegisterSingleton<DashboardViewModel>();
             container.RegisterSingleton<MainWindow>();
 

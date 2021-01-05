@@ -1,24 +1,43 @@
-﻿using Serilog;
+﻿using Kantoku.Master.Helpers.Fetchers;
+using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
-using System.Text;
+using System.Linq;
+using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace Kantoku.Master.Media.Services
 {
     public class SatelliteService : IService
     {
-        public event EventHandler<ISession>? SessionStarted;
+        private enum EventKind
+        {
+            Started,
+            Paused,
+            Resumed,
+            TimeUpdated,
+        }
 
+        public event EventHandler<ISession> SessionStarted = delegate { };
+
+        private readonly IDictionary<string, Session> Sessions = new Dictionary<string, Session>();
         private readonly IList<NamedPipeServerStream> Servers = new List<NamedPipeServerStream>();
         private readonly ILogger Logger;
+        private readonly SynchronizationContext SynchronizationContext;
 
-        public SatelliteService(ILogger logger)
+        public SatelliteService(ILogger logger, SynchronizationContext synchronizationContext)
         {
             this.Logger = logger.For<SatelliteService>();
+            this.SynchronizationContext = synchronizationContext;
         }
+
+        private void OnSessionStarted(ISession session) => this.SynchronizationContext.Send(_ => SessionStarted(this, session), null);
 
         public Task Start()
         {
@@ -73,7 +92,7 @@ namespace Kantoku.Master.Media.Services
             var sizeBuffer = new byte[4];
             int read, messageSize;
 
-            var message = new MemoryStream();
+            using var message = new MemoryStream();
 
             while (true)
             {
@@ -97,16 +116,148 @@ namespace Kantoku.Master.Media.Services
                 }
 
                 message.Position = 0;
-                HandleMessage(Encoding.UTF8.GetString(message.ToArray()));
+                HandleMessage(message, pipe);
                 message.SetLength(0);
             }
 
             logger.Verbose("Exited read loop");
         }
 
-        private void HandleMessage(string data)
+        private void HandleMessage(Stream data, NamedPipeServerStream pipe)
         {
-            Logger.Debug("Handling message {Message}", data);
+            Logger.Debug("Handling message length {Message}", data.Length);
+
+            var el = JsonDocument.Parse(data).RootElement;
+            if (!(el.ValueKind == JsonValueKind.Array && (el.GetArrayLength() is 2 or 3)))
+                return;
+
+            var arrayData = el.EnumerateArray().ToArray();
+
+            var eventKind = (EventKind)arrayData[0].GetInt32();
+
+            var id = arrayData[1].GetString();
+
+            Debug.Assert(id != null);
+            Logger.Debug("Got event {Event} from browser session ID {ID}", eventKind, id);
+
+            Session? session = null;
+
+            if (eventKind == EventKind.Started)
+            {
+                if (Sessions.ContainsKey(id))
+                {
+                    Logger.Error("Tried to start already started session ID {ID}", id);
+                    return;
+                }
+
+                this.SynchronizationContext.Send(_ =>
+                {
+                    session = Session.CreateNew(Logger, pipe, arrayData[2]);
+                    Logger.Debug("Created session ID {ID}", session.ID);
+
+                    Sessions.Add(id, session);
+                    SessionStarted(this, session);
+                }, null);
+            }
+
+            if (session == null && !Sessions.TryGetValue(id, out session))
+            {
+                Logger.Error("Unknown session {ID}", id);
+                return;
+            }
+
+            session.HandleMessage(eventKind, arrayData.Length > 2 ? arrayData[2] : default);
+        }
+
+        private record BrowserMediaInfo(string Title, string Author, string IconUrl, string AppName);
+
+        private class Session : ISession
+        {
+            public Guid ID { get; }
+
+            public AppInfo App { get; }
+
+            public TimeSpan Position { get; private set; }
+
+            public bool IsPlaying { get; private set; }
+
+            public MediaInfo? Media { get; private set; }
+
+            public event Action Closed = delegate { };
+            public event Action Updated = delegate { };
+
+            private readonly ILogger Logger;
+            private readonly NamedPipeServerStream Pipe;
+
+            private Session(ILogger rootLogger, NamedPipeServerStream pipe, AppInfo app)
+            {
+                this.ID = Guid.NewGuid();
+                this.Logger = rootLogger.For("Session " + ID);
+                this.Pipe = pipe;
+                this.App = app;
+            }
+
+            public static Session CreateNew(ILogger rootLogger, NamedPipeServerStream pipe, JsonElement initData)
+            {
+                if (initData.ValueKind != JsonValueKind.Object)
+                    throw new ArgumentException("Invalid media data", nameof(initData));
+
+                var info = initData.ToObject<BrowserMediaInfo>(new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                }) ?? throw new Exception("Invalid media data");
+
+                rootLogger.Debug("Media info: {Info}", info);
+
+                var icon = new BitmapImage(new Uri(info.IconUrl ?? ""));
+
+                var app = new AppInfo(info.AppName, icon);
+
+                return new Session(rootLogger, pipe, app);
+            }
+
+            public void Dispose()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void HandleMessage(EventKind kind, JsonElement data)
+            {
+                switch (kind)
+                {
+                    case EventKind.Paused:
+                        break;
+                    case EventKind.Resumed:
+                        break;
+                    case EventKind.TimeUpdated:
+                        break;
+                }
+            }
+
+            public Task Next()
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task Pause()
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task Play()
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task Previous()
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task Stop()
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }
