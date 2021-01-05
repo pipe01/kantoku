@@ -28,7 +28,7 @@
                         <DockPanel>
                             <Image Source="{Binding Session.App.Icon}" Width="16" Height="16" Margin="0 0 4 0"></Image>
                             <TextBlock Text="{Binding FullName}"></TextBlock>
-                            <TextBlock Text="Paused" Margin="3 0 0 0" Visibility="{Binding Session.IsPlaying, Converter={helpers:BoolToVisibilityConverter}, ConverterParameter='true'}"></TextBlock>
+                            <TextBlock Text="(Paused)" Margin="3 0 0 0" Visibility="{Binding Session.IsPlaying, Converter={helpers:BoolToVisibilityConverter}, ConverterParameter='true'}"></TextBlock>
                         </DockPanel>
                     </DataTemplate>
                 </ListView.ItemTemplate>
