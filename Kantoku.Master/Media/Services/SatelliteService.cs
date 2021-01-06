@@ -153,7 +153,7 @@ namespace Kantoku.Master.Media.Services
 
                 this.SynchronizationContext.Send(_ =>
                 {
-                    session = Session.CreateNew(Logger, pipe, arrayData[2]);
+                    session = new Session(Logger, pipe);
                     Logger.Debug("Created session ID {ID}", session.ID);
 
                     Sessions.Add(id, session);
@@ -167,7 +167,7 @@ namespace Kantoku.Master.Media.Services
                 return;
             }
 
-            session.HandleMessage(eventKind, arrayData.Length > 2 ? arrayData[2] : default);
+            this.SynchronizationContext.Post(() => session.HandleMessage(eventKind, arrayData.Length > 2 ? arrayData[2] : default));
         }
 
         private record BrowserMediaInfo(string Title, string Author, string IconUrl, string AppName);
@@ -176,7 +176,7 @@ namespace Kantoku.Master.Media.Services
         {
             public Guid ID { get; }
 
-            public AppInfo App { get; }
+            public AppInfo? App { get; private set; }
 
             public TimeSpan Position { get; private set; }
 
@@ -190,42 +190,38 @@ namespace Kantoku.Master.Media.Services
             private readonly ILogger Logger;
             private readonly NamedPipeServerStream Pipe;
 
-            private Session(ILogger rootLogger, NamedPipeServerStream pipe, AppInfo app)
+            public Session(ILogger rootLogger, NamedPipeServerStream pipe)
             {
                 this.ID = Guid.NewGuid();
                 this.Logger = rootLogger.For("Satellite Session " + ID);
                 this.Pipe = pipe;
-                this.App = app;
-            }
-
-            public static Session CreateNew(ILogger rootLogger, NamedPipeServerStream pipe, JsonElement initData)
-            {
-                if (initData.ValueKind != JsonValueKind.Object)
-                    throw new ArgumentException("Invalid media data", nameof(initData));
-
-                var info = initData.ToObject<BrowserMediaInfo>(new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                }) ?? throw new Exception("Invalid media data");
-
-                rootLogger.Verbose("Media info: {Info}", info);
-
-                var icon = new BitmapImage(new Uri(info.IconUrl ?? ""));
-
-                var app = new AppInfo(info.AppName, icon);
-
-                return new Session(rootLogger, pipe, app);
+                this.App = null;
             }
 
             public void Dispose()
             {
-                throw new NotImplementedException();
             }
 
             public void HandleMessage(EventKind kind, JsonElement data)
             {
                 switch (kind)
                 {
+                    case EventKind.Started:
+                        var info = data.ToObject<BrowserMediaInfo>(new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        }) ?? throw new Exception("Invalid media data");
+
+                        Logger.Verbose("Media info: {Info}", info);
+
+                        var icon = new BitmapImage();
+                        icon.BeginInit();
+                        icon.UriSource = new Uri(info.IconUrl ?? "");
+                        icon.EndInit();
+
+                        this.App = new AppInfo(info.AppName, icon);
+                        break;
+
                     case EventKind.Paused:
                         break;
                     case EventKind.Resumed:

@@ -10,7 +10,7 @@ namespace Kantoku.Master.Media
         event Action Closed;
 
         Guid ID { get; }
-        AppInfo App { get; }
+        AppInfo? App { get; }
 
         TimeSpan Position { get; }
         bool IsPlaying { get; }
