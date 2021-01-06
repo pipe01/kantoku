@@ -3,6 +3,7 @@ export type MediaInfo = {
     author: string;
     iconUrl: string;
     appName: string;
+    duration: number;
 }
 
 export interface Fetcher {

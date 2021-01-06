@@ -103,7 +103,6 @@ namespace Kantoku.Master.Media.Services
                 messageSize = BitConverter.ToInt32(sizeBuffer);
 
                 logger.Verbose($"Message size is {messageSize} bytes");
-                logger.Verbose(BitConverter.ToString(sizeBuffer));
 
                 while (message.Length < messageSize)
                 {
@@ -111,7 +110,6 @@ namespace Kantoku.Master.Media.Services
                         return;
 
                     logger.Verbose($"Read {read} bytes from browser");
-                    logger.Verbose(BitConverter.ToString(sizeBuffer));
 
                     message.Write(buffer, 0, read);
                 }
@@ -170,7 +168,7 @@ namespace Kantoku.Master.Media.Services
             this.SynchronizationContext.Post(() => session.HandleMessage(eventKind, arrayData.Length > 2 ? arrayData[2] : default));
         }
 
-        private record BrowserMediaInfo(string Title, string Author, string IconUrl, string AppName);
+        private record BrowserMediaInfo(string Title, string Author, string IconUrl, string AppName, double Duration);
 
         private class Session : ISession
         {
@@ -220,13 +218,19 @@ namespace Kantoku.Master.Media.Services
                         icon.EndInit();
 
                         this.App = new AppInfo(info.AppName, icon);
+                        this.Media = new MediaInfo(info.Title, info.Author, TimeSpan.FromSeconds(info.Duration));
                         break;
 
                     case EventKind.Paused:
+                        IsPlaying = false;
                         break;
+
                     case EventKind.Resumed:
+                        IsPlaying = true;
                         break;
+
                     case EventKind.TimeUpdated:
+                        Position = TimeSpan.FromSeconds(data.GetDouble());
                         break;
                 }
             }

@@ -30,6 +30,7 @@ function attachTo(element: Element) {
     var id = md5(date.toString() + date.getMilliseconds());
 
     var video = <HTMLVideoElement>element
+    var keepalive: NodeJS.Timeout;
 
     function sendMessage(ev: Events, data?: any) {
         debug("send message", ev, data)
@@ -42,13 +43,17 @@ function attachTo(element: Element) {
             debug("failed to fetch media info");
             return;
         }
+        if (!media.duration) {
+            media.duration = video.duration;
+        }
         debug("fetched media info", media);
 
         sendMessage(Events.Started, media);
+        keepalive = setInterval(() => sendMessage(Events.Keepalive), 5000);
     }
 
     video.addEventListener("pause", () => sendMessage(Events.Paused));
     video.addEventListener("play", () => sendMessage(Events.Resumed));
-    // video.addEventListener("timeupdate", () => sendMessage(Events.TimeUpdated, [video.currentTime, video.duration]));
+    video.addEventListener("timeupdate", () => sendMessage(Events.TimeUpdated, [video.currentTime, video.duration]));
     video.addEventListener("loadedmetadata", started);
 }

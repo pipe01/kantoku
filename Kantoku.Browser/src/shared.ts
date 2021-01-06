@@ -3,4 +3,6 @@ export enum Events {
     Paused,
     Resumed,
     TimeUpdated,
+    Keepalive,
+    Closed,
 }

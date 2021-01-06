@@ -174,8 +174,9 @@ namespace Kantoku.Master.Media.Services
                 Logger.Verbose("Reloading media properties");
 
                 var props = await GSMTCSession.TryGetMediaPropertiesAsync();
+                var timeline = GSMTCSession.GetTimelineProperties();
 
-                Media = new MediaInfo(props.Title, props.Artist);
+                Media = new MediaInfo(props.Title, props.Artist, timeline.EndTime);
             }
 
             public void Close()
