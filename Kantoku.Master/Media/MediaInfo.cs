@@ -1,12 +1,15 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace Kantoku.Master.Media
 {
-    public readonly struct MediaInfo
+    public class MediaInfo : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler? PropertyChanged;
+
         public string Title { get; }
         public string Author { get; }
-        public TimeSpan Duration { get; }
+        public TimeSpan Duration { get; set; }
 
         public MediaInfo(string title, string author, TimeSpan duration)
         {

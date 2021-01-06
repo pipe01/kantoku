@@ -1,4 +1,5 @@
-﻿using Kantoku.Master.Helpers.Fetchers;
+﻿using Kantoku.Master.Helpers;
+using Kantoku.Master.Helpers.Fetchers;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -55,7 +56,7 @@ namespace Kantoku.Master.Media.Services
 
             Servers.Add(pipe);
 
-            Task.Run(() =>
+            Task.Run(async () =>
             {
                 var logger = Logger.For("Satellite " + Servers.Count);
 
@@ -75,7 +76,7 @@ namespace Kantoku.Master.Media.Services
                 {
                     logger.Debug("Starting read loop");
 
-                    ReadLoop(pipe, logger);
+                    await ReadLoop(pipe, logger);
                 }
                 finally
                 {
@@ -87,50 +88,35 @@ namespace Kantoku.Master.Media.Services
             });
         }
 
-        private void ReadLoop(NamedPipeServerStream pipe, ILogger logger)
+        private async Task ReadLoop(NamedPipeServerStream pipe, ILogger logger)
         {
-            var buffer = new byte[1024];
-            var sizeBuffer = new byte[4];
-            int read, messageSize;
+            var reader = new MessageReader(pipe);
 
-            using var message = new MemoryStream();
-
-            while (true)
+            await foreach (var item in reader)
             {
-                if (pipe.Read(sizeBuffer) == 0)
-                    break;
+                Debug.Assert(item != null);
 
-                messageSize = BitConverter.ToInt32(sizeBuffer);
-
-                logger.Verbose($"Message size is {messageSize} bytes");
-
-                while (message.Length < messageSize)
+                try
                 {
-                    if ((read = pipe.Read(buffer)) == 0)
-                        return;
-
-                    logger.Verbose($"Read {read} bytes from browser");
-
-                    message.Write(buffer, 0, read);
+                    HandleMessage(pipe, item.RootElement);
                 }
-
-                message.Position = 0;
-                HandleMessage(message, pipe);
-                message.SetLength(0);
+                finally
+                {
+                    item.Dispose();
+                }
             }
 
             logger.Verbose("Exited read loop");
         }
 
-        private void HandleMessage(Stream data, NamedPipeServerStream pipe)
+        private void HandleMessage(NamedPipeServerStream pipe, JsonElement data)
         {
-            Logger.Debug("Handling message length {Message}", data.Length);
+            Logger.Debug("Handling message {Message}", data);
 
-            var el = JsonDocument.Parse(data).RootElement;
-            if (!(el.ValueKind == JsonValueKind.Array && (el.GetArrayLength() is 2 or 3)))
+            if (!(data.ValueKind == JsonValueKind.Array && (data.GetArrayLength() is 2 or 3)))
                 return;
 
-            var arrayData = el.EnumerateArray().ToArray();
+            var arrayData = data.EnumerateArray().ToArray();
 
             var eventKind = (EventKind)arrayData[0].GetInt32();
 
@@ -165,7 +151,7 @@ namespace Kantoku.Master.Media.Services
                 return;
             }
 
-            this.SynchronizationContext.Post(() => session.HandleMessage(eventKind, arrayData.Length > 2 ? arrayData[2] : default));
+            this.SynchronizationContext.Send(() => session.HandleMessage(eventKind, arrayData.Length > 2 ? arrayData[2] : default));
         }
 
         private record BrowserMediaInfo(string Title, string Author, string IconUrl, string AppName, double Duration);
@@ -230,7 +216,17 @@ namespace Kantoku.Master.Media.Services
                         break;
 
                     case EventKind.TimeUpdated:
-                        Position = TimeSpan.FromSeconds(data.GetDouble());
+                        var times = data.EnumerateArray().Select(o => o.GetDouble()).ToArray();
+                        if (times.Length != 2)
+                        {
+#if DEBUG
+                            throw new Exception($"Invalid time array length {times.Length}");
+#else
+                            break;
+#endif
+                        }
+
+                        Position = TimeSpan.FromSeconds(times[1]);
                         break;
                 }
             }

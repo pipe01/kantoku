@@ -37,6 +37,7 @@ namespace Kantoku.Master
                 .CreateLogger();
 
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+            this.DispatcherUnhandledException += App_DispatcherUnhandledException;
 
             Log.Information("===========================================");
             Log.Debug("Registering services");
@@ -78,6 +79,11 @@ namespace Kantoku.Master
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             Log.Fatal(e.ExceptionObject as Exception, "Unhandled exception");
+        }
+
+        private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
+            Log.Error(e.Exception, "Unhandled dispatcher exception");
         }
     }
 }

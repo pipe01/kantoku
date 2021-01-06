@@ -32,6 +32,11 @@
                                        Visibility="{Binding Session.IsPlaying, Converter={helpers:BoolToVisibilityConverter}, ConverterParameter='true'}"></Image>
                             </Canvas>
                             <TextBlock Text="{Binding FullName}"></TextBlock>
+                            <TextBlock Text=" ("></TextBlock>
+                            <TextBlock Text="{Binding Session.Position, StringFormat=mm\\:ss}"></TextBlock>
+                            <TextBlock Text="/"></TextBlock>
+                            <TextBlock Text="{Binding Session.Media.Duration, StringFormat=mm\\:ss}"></TextBlock>
+                            <TextBlock Text=")"></TextBlock>
                         </DockPanel>
                     </DataTemplate>
                 </ListView.ItemTemplate>

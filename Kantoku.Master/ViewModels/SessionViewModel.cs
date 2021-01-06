@@ -9,7 +9,7 @@ namespace Kantoku.Master.ViewModels
     {
         public event PropertyChangedEventHandler? PropertyChanged = delegate { };
 
-        public string FullName => Session.Media == null ? "Loading..." : $"{Session.Media.Value.Author} - {Session.Media.Value.Title}";
+        public string FullName => Session.Media == null ? "Loading..." : $"{Session.Media.Author} - {Session.Media.Title}";
 
         public ISession Session { get; }
 
