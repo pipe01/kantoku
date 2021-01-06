@@ -26,18 +26,27 @@ function attachTo(element: Element) {
     if (element.tagName != "VIDEO")
         return;
 
-    var date = new Date();
-    var id = md5(date.toString() + date.getMilliseconds());
+    var id: string;
 
     var video = <HTMLVideoElement>element
     var keepalive: NodeJS.Timeout;
 
     function sendMessage(ev: Events, data?: any) {
+        if (!id)
+            return;
+    
         debug("send message", ev, data)
         browser.runtime.sendMessage([ev, id, ...(data ? [data] : [])])
     }
 
+    function close() {
+        if (id)
+            sendMessage(Events.Closed);
+    }
+
     async function started() {
+        close();
+        
         const media = await fetchInfo();
         if (!media) {
             debug("failed to fetch media info");
@@ -46,11 +55,18 @@ function attachTo(element: Element) {
         if (!media.duration) {
             media.duration = video.duration;
         }
-        debug("fetched media info", media);
+
+        var date = new Date();
+        id = md5(date.toString() + date.getMilliseconds());
 
         sendMessage(Events.Started, media);
         keepalive = setInterval(() => sendMessage(Events.Keepalive), 5000);
+
+        if (!video.paused)
+            sendMessage(Events.Resumed);
     }
+
+    window.addEventListener("beforeunload", e => close());
 
     video.addEventListener("pause", () => sendMessage(Events.Paused));
     video.addEventListener("play", () => sendMessage(Events.Resumed));

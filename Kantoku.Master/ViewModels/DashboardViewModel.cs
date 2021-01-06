@@ -35,7 +35,7 @@ namespace Kantoku.Master.ViewModels
 
             SynchronizationContext.Send(() => Sessions.Add(vm));
 
-            e.Closed += () => SynchronizationContext.Send(() => Sessions.Remove(vm));
+            e.Closed += _ => SynchronizationContext.Send(() => Sessions.Remove(vm));
         }
     }
 }

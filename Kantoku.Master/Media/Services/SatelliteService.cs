@@ -24,6 +24,8 @@ namespace Kantoku.Master.Media.Services
             Paused,
             Resumed,
             TimeUpdated,
+            Keepalive,
+            Closed,
         }
 
         public event EventHandler<ISession> SessionStarted = delegate { };
@@ -39,7 +41,7 @@ namespace Kantoku.Master.Media.Services
             this.SynchronizationContext = synchronizationContext;
         }
 
-        private void OnSessionStarted(ISession session) => this.SynchronizationContext.Send(_ => SessionStarted(this, session), null);
+        private void OnSessionStarted(ISession session) => this.SynchronizationContext.Send(() => SessionStarted(this, session));
 
         public Task Start()
         {
@@ -135,14 +137,13 @@ namespace Kantoku.Master.Media.Services
                     return;
                 }
 
-                this.SynchronizationContext.Send(_ =>
-                {
-                    session = new Session(Logger, pipe);
-                    Logger.Debug("Created session ID {ID}", session.ID);
+                session = new Session(Logger, pipe);
+                session.Closed += Session_Closed;
 
-                    Sessions.Add(id, session);
-                    SessionStarted(this, session);
-                }, null);
+                Logger.Debug("Created session ID {ID}", session.ID);
+                Sessions.Add(id, session);
+
+                OnSessionStarted(session);
             }
 
             if (session == null && !Sessions.TryGetValue(id, out session))
@@ -152,6 +153,13 @@ namespace Kantoku.Master.Media.Services
             }
 
             this.SynchronizationContext.Send(() => session.HandleMessage(eventKind, arrayData.Length > 2 ? arrayData[2] : default));
+        }
+
+        private void Session_Closed(ISession session)
+        {
+            Logger.Debug("Closed session ID {ID}", session.ID);
+
+            session.Closed -= Session_Closed;
         }
 
         private record BrowserMediaInfo(string Title, string Author, string IconUrl, string AppName, double Duration);
@@ -168,7 +176,7 @@ namespace Kantoku.Master.Media.Services
 
             public MediaInfo? Media { get; private set; }
 
-            public event Action Closed = delegate { };
+            public event SessionEventHandler Closed = delegate { };
             public event PropertyChangedEventHandler? PropertyChanged;
 
             private readonly ILogger Logger;
@@ -207,6 +215,10 @@ namespace Kantoku.Master.Media.Services
                         this.Media = new MediaInfo(info.Title, info.Author, TimeSpan.FromSeconds(info.Duration));
                         break;
 
+                    case EventKind.Closed:
+                        Closed(this);
+                        break;
+
                     case EventKind.Paused:
                         IsPlaying = false;
                         break;
@@ -226,7 +238,10 @@ namespace Kantoku.Master.Media.Services
 #endif
                         }
 
-                        Position = TimeSpan.FromSeconds(times[1]);
+                        Position = TimeSpan.FromSeconds(times[0]);
+                        if (Media != null)
+                            Media.Duration = TimeSpan.FromSeconds(times[1]);
+
                         break;
                 }
             }
