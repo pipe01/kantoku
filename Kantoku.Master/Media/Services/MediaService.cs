@@ -6,10 +6,11 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Media.Control;
+
+using Timer = System.Timers.Timer;
 
 namespace Kantoku.Master.Media.Services
 {
@@ -97,7 +98,7 @@ namespace Kantoku.Master.Media.Services
 
         private class Session : ISession
         {
-            public TimeSpan Position => GSMTCSession.GetTimelineProperties().Position;
+            public TimeSpan Position => LastKnownPosition.Add(LastKnownPositionTimer.Elapsed);
 
             public bool IsPlaying => GSMTCSession.GetPlaybackInfo().PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing;
 
@@ -112,8 +113,11 @@ namespace Kantoku.Master.Media.Services
 
             private readonly GSMTCSession GSMTCSession;
             private readonly ILogger Logger;
+            private readonly Timer TimelineTimer;
+            private readonly Stopwatch LastKnownPositionTimer = Stopwatch.StartNew();
 
             private bool IsClosed;
+            private TimeSpan LastKnownPosition;
 
             private Session(GSMTCSession gSMTCSession, ILogger rootLogger, AppInfo app)
             {
@@ -121,9 +125,14 @@ namespace Kantoku.Master.Media.Services
                 this.ID = Guid.NewGuid();
                 this.Logger = rootLogger.For("GSMTC Session " + ID);
                 this.App = app;
+                this.TimelineTimer = new Timer(500);
+
+                TimelineTimer.Elapsed += delegate { ReloadTimeline(); };
+                TimelineTimer.Start();
 
                 GSMTCSession.MediaPropertiesChanged += GSMTCSession_MediaPropertiesChanged;
                 GSMTCSession.PlaybackInfoChanged += GSMTCSession_PlaybackInfoChanged;
+                GSMTCSession.TimelinePropertiesChanged += GSMTCSession_TimelinePropertiesChanged;
             }
 
             public static async Task<Session> CreateNew(GSMTCSession gsmtcSession, ILogger rootLogger, IAppInfoFetcher appInfoFetcher)
@@ -153,20 +162,54 @@ namespace Kantoku.Master.Media.Services
 
                 OnPropertyChanged(nameof(IsPlaying));
 
-                if (status == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Closed && !IsClosed)
+                switch (status)
                 {
-                    Logger.Debug("GSMTC session was closed");
+                    case GlobalSystemMediaTransportControlsSessionPlaybackStatus.Closed when !IsClosed:
+                        Logger.Debug("GSMTC session was closed");
 
-                    Close();
+                        Close();
+                        break;
+
+                    case GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing:
+                        TimelineTimer.Start();
+                        break;
+
+                    case GlobalSystemMediaTransportControlsSessionPlaybackStatus.Paused:
+                    case GlobalSystemMediaTransportControlsSessionPlaybackStatus.Stopped:
+                        TimelineTimer.Stop();
+                        break;
                 }
+            }
+
+            private void GSMTCSession_TimelinePropertiesChanged(GSMTCSession sender, TimelinePropertiesChangedEventArgs args)
+            {
+                Logger.Verbose("Changed timeline properties");
+
+                LastKnownPosition = GSMTCSession.GetTimelineProperties().Position;
+                LastKnownPositionTimer.Restart();
+
+                ReloadTimeline();
+            }
+
+            private void ReloadTimeline()
+            {
+                LastKnownPosition = GSMTCSession.GetTimelineProperties().Position;
+
+                OnPropertyChanged(nameof(Position));
+
+                if (Media != null)
+                    Media.Duration = GSMTCSession.GetTimelineProperties().EndTime;
             }
 
             public void Dispose()
             {
                 Logger.Verbose("Disposing session");
 
+                TimelineTimer.Dispose();
+
                 GSMTCSession.MediaPropertiesChanged -= GSMTCSession_MediaPropertiesChanged;
                 GSMTCSession.PlaybackInfoChanged -= GSMTCSession_PlaybackInfoChanged;
+                GSMTCSession.TimelinePropertiesChanged -= GSMTCSession_TimelinePropertiesChanged;
             }
 
             public async Task LoadInfo()
