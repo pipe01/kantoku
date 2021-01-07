@@ -26,7 +26,7 @@ function attachTo(element: Element) {
     if (element.tagName != "VIDEO")
         return;
 
-    var id: string;
+    var id: string | null;
 
     var video = <HTMLVideoElement>element
     var keepalive: NodeJS.Timeout;
@@ -40,8 +40,10 @@ function attachTo(element: Element) {
     }
 
     function close() {
-        if (id)
+        if (id) {
             sendMessage(Events.Closed);
+            id = null;
+        }
     }
 
     async function started() {
