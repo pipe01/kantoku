@@ -8,8 +8,6 @@ namespace Kantoku.Master
 {
     public class Satellite
     {
-        public static bool IsAppSatellite(string[] args) => args.Length >= 1;
-
         public const string PipeName = "Kantoku";
 
         private readonly StreamWriter LogWriter;
@@ -31,6 +29,8 @@ namespace Kantoku.Master
         }
 #endif
 
+        public static bool IsAppSatellite(string[] args) => args.Length >= 1;
+
         [Conditional("DEBUG")]
         private void Log(string? message)
         {
@@ -43,39 +43,31 @@ namespace Kantoku.Master
             var stdin = Console.OpenStandardInput();
             var stdout = Console.OpenStandardOutput();
 
-            Stream? pipeStream = null;
-
-            _ = Task.Run(() => ReadLoop(stdin, ref pipeStream));
-
-            using var pipe = new NamedPipeClientStream(".", PipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
+            using var master = new NamedPipeClientStream(".", PipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
 
             Log("Connecting to master...");
 
-            pipe.Connect();
+            master.Connect();
 
             Log("Connected");
 
-            pipeStream = pipe;
-            ReadLoop(pipe, ref stdout);
+            Task.Run(() => ReadLoop(stdin, master, "browser"));
+            ReadLoop(master, stdout, "master");
         }
 
-        private void ReadLoop(Stream inStream, ref Stream? outStream)
+        private void ReadLoop(Stream inStream, Stream outStream, string from)
         {
             var buffer = new byte[1024];
             int read;
 
             while ((read = inStream.Read(buffer)) != 0)
             {
-                Log($"Read {read} bytes");
-
-                if (outStream == null)
-                    continue;
+                Log($"Read {read} bytes from {from}");
 
                 outStream.Write(buffer, 0, read);
-                outStream.Flush();
             }
 
-            Log("Exited sync read loop");
+            Log($"Exited read loop from {from}");
         }
     }
 }
