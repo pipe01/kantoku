@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace Kantoku.Master.Helpers
 {
-    public class MessageWriter
+    public class MessageWriter : IDisposable
     {
         private readonly Stream Stream;
         private readonly BlockingCollection<ReadOnlyMemory<byte>> PendingWrites = new BlockingCollection<ReadOnlyMemory<byte>>();
@@ -21,6 +21,11 @@ namespace Kantoku.Master.Helpers
                 Name = "Message writer thread",
                 IsBackground = true
             }.Start();
+        }
+
+        public void Dispose()
+        {
+            PendingWrites.Dispose();
         }
 
         public void Write(ReadOnlyMemory<byte> data)

@@ -201,6 +201,7 @@ namespace Kantoku.Master.Media.Services
 
             public void Dispose()
             {
+                Writer.Dispose();
             }
 
             public void HandleMessage(EventKind kind, JsonElement data)
