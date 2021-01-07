@@ -32,6 +32,9 @@ namespace Kantoku.Master.Helpers
             var result = await Reader.ReadAsync();
             this.Completed = result.IsCompleted;
 
+            if (result.IsCompleted && result.Buffer.Length == 0)
+                return false;
+
             if (!TryReadLength(result.Buffer, out var dataLength))
                 throw new InvalidOperationException($"Not enough data to read length");
 

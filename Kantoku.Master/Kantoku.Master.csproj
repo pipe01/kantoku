@@ -6,7 +6,6 @@
     <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
     <ApplicationIcon>kantoku.ico</ApplicationIcon>
-      <StartupObject>Kantoku.Master.Program</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>

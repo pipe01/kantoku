@@ -17,37 +17,51 @@ namespace Kantoku.Master.Helpers
             const string currentUserKey = @"HKEY_CURRENT_USER\Software\Mozilla\NativeMessagingHosts\kantoku";
             const string localMachineKey = @"HKEY_LOCAL_MACHINE\Software\Mozilla\NativeMessagingHosts\kantoku";
 
-            if (Registry.GetValue(currentUserKey, null, null) != null)
+            string manifestPath = Path.GetFullPath("manifest.json");
+
+            WriteManifest(manifestPath);
+
+            if (Registry.GetValue(currentUserKey, null, null) != null &&
+                Registry.GetValue(localMachineKey, null, null) != null)
+            {
                 return;
+            }
 
             Log.Debug("Registering native host in registry");
-
-            string binary = Process.GetCurrentProcess().MainModule?.FileName ?? throw new Exception("Couldn't determine main module");
 
             if (!IsElevated)
             {
                 Log.Information("Relaunching process as administrator");
+
+                string binary = Process.GetCurrentProcess().MainModule?.FileName ?? throw new Exception("Couldn't determine main module");
 
                 LaunchAsAdministrator(binary, Environment.GetCommandLineArgs()[1..]);
                 Application.Current.Shutdown();
                 return;
             }
 
-            string manifestPath = Path.GetFullPath("manifest.json");
+            Registry.SetValue(currentUserKey, null, manifestPath);
+            Registry.SetValue(localMachineKey, null, manifestPath);
+        }
+
+        private static void WriteManifest(string path)
+        {
+            string satelliteBin = Path.GetFullPath("Kantoku.Satellite.exe");
+
+            if (!File.Exists(satelliteBin))
+                throw new FileNotFoundException("The satellite binary could not be found");
+
             string manifestContents = @$"
 {{
   ""name"": ""kantoku"",
   ""description"": ""Kantoku satellite"",
-  ""path"": ""{binary.Replace("\\", "\\\\")}"",
+  ""path"": ""{satelliteBin.Replace("\\", "\\\\")}"",
   ""type"": ""stdio"",
   ""allowed_extensions"": [ ""kantoku@pipe01.net"" ]
 }}
 ";
 
-            File.WriteAllText(manifestPath, manifestContents);
-
-            Registry.SetValue(currentUserKey, null, manifestPath);
-            Registry.SetValue(localMachineKey, null, manifestPath);
+            File.WriteAllText(path, manifestContents);
         }
 
         private static void LaunchAsAdministrator(string path, string[] args)

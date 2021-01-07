@@ -60,7 +60,7 @@ namespace Kantoku.Master.Media.Services
 
         private void StartPipe()
         {
-            var pipe = new NamedPipeServerStream(Satellite.PipeName, PipeDirection.InOut, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
+            var pipe = new NamedPipeServerStream("Kantoku", PipeDirection.InOut, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
 
             Logger.Debug("Starting pipe {Number}", Servers.Count + 1);
 
