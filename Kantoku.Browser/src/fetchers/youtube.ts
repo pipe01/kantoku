@@ -1,7 +1,9 @@
+import axios from "axios";
 import { Fetcher } from "./";
 
-function timeout(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+type EmbedData = {
+    author_name: string;
+    title: string;
 }
 
 export default <Fetcher>{
@@ -9,19 +11,14 @@ export default <Fetcher>{
         return /youtube\.com\/watch\?v=/.test(location.href);
     },
     async fetchInfo() {
-        var titleEl: HTMLElement | null = null;
-        var channelEl: HTMLElement | null = null;
-
-        do {
-            titleEl = document.querySelector(".title > yt-formatted-string.ytd-video-primary-info-renderer");
-            channelEl = document.querySelector(".ytd-channel-name > a");
-
-            await timeout(100);
-        } while (!titleEl || !channelEl);
+        var urlParams = new URLSearchParams(location.search);
+        var videoId = urlParams.get("v");
         
+        var resp = await axios.get<EmbedData>(`https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/watch?v=${videoId}`);
+
         return {
-            title: titleEl?.innerText,
-            author: channelEl?.innerText,
+            title: resp.data.title,
+            author: resp.data.author_name,
             appName: "YouTube"
         }
     }

@@ -8,6 +8,7 @@
     },
     "dependencies": {
         "@types/md5": "^2.2.1",
+        "axios": "^0.21.1",
         "babel-polyfill": "^6.26.0",
         "md5": "^2.3.0",
         "webextension-polyfill-ts": "^0.22.0"
