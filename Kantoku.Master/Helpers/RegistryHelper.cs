@@ -27,16 +27,11 @@ namespace Kantoku.Master.Helpers
                 return;
             }
 
-            Log.Debug("Registering native host in registry");
-
             if (!IsElevated)
             {
-                Log.Information("Relaunching process as administrator");
-
                 string binary = Process.GetCurrentProcess().MainModule?.FileName ?? throw new Exception("Couldn't determine main module");
 
-                LaunchAsAdministrator(binary, Environment.GetCommandLineArgs()[1..]);
-                Application.Current.Shutdown();
+                LaunchAsAdministrator(binary, new[] { "--register" });
                 return;
             }
 
@@ -76,6 +71,7 @@ namespace Kantoku.Master.Helpers
             };
 
             proc.Start();
+            proc.WaitForExit();
         }
     }
 }

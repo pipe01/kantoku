@@ -19,6 +19,14 @@ namespace Kantoku.Master
     {
         protected override void OnStartup(StartupEventArgs e)
         {
+            RegistryHelper.RegisterNativeHost();
+
+            if (e.Args.Length > 0 && e.Args[0] == "--register")
+            {
+                Environment.Exit(0);
+                return;
+            }
+
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Verbose()
                 .WriteTo.Debug(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}")
@@ -50,8 +58,6 @@ namespace Kantoku.Master
 
                 container.RegisterSingleton(typeof(IService), type, type.Name);
             }
-
-            RegistryHelper.RegisterNativeHost();
 
             Log.Information("Kantoku starting up");
 
