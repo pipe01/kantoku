@@ -8,7 +8,9 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media;
@@ -26,6 +28,12 @@ namespace Kantoku.Master.Media.Services
             TimeUpdated,
             Keepalive,
             Closed,
+
+            Next,
+            Previous,
+            Play,
+            Pause,
+            Stop
         }
 
         public event EventHandler<ISession> SessionStarted = delegate { };
@@ -52,7 +60,7 @@ namespace Kantoku.Master.Media.Services
 
         private void StartPipe()
         {
-            var pipe = new NamedPipeServerStream(Satellite.PipeName, PipeDirection.InOut, NamedPipeServerStream.MaxAllowedServerInstances);
+            var pipe = new NamedPipeServerStream(Satellite.PipeName, PipeDirection.InOut, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
 
             Logger.Debug("Starting pipe {Number}", Servers.Count + 1);
 
@@ -137,7 +145,7 @@ namespace Kantoku.Master.Media.Services
                     return;
                 }
 
-                session = new Session(Logger, pipe);
+                session = new Session(Logger, pipe, id);
                 session.Closed += Session_Closed;
 
                 Logger.Debug("Created session ID {ID}", session.ID);
@@ -180,14 +188,15 @@ namespace Kantoku.Master.Media.Services
             public event PropertyChangedEventHandler? PropertyChanged;
 
             private readonly ILogger Logger;
-            private readonly NamedPipeServerStream Pipe;
+            private readonly MessageWriter Writer;
+            private readonly string BrowserID;
 
-            public Session(ILogger rootLogger, NamedPipeServerStream pipe)
+            public Session(ILogger rootLogger, NamedPipeServerStream pipe, string browserID)
             {
                 this.ID = Guid.NewGuid();
                 this.Logger = rootLogger.For("Satellite Session " + ID);
-                this.Pipe = pipe;
-                this.App = null;
+                this.Writer = new MessageWriter(pipe);
+                this.BrowserID = browserID;
             }
 
             public void Dispose()
@@ -246,29 +255,49 @@ namespace Kantoku.Master.Media.Services
                 }
             }
 
+            private void SendMessage(EventKind kind)
+            {
+                Writer.Write(kind, BrowserID);
+            }
+
             public Task Next()
             {
-                throw new NotImplementedException();
+                Logger.Debug("Skip next");
+
+                SendMessage(EventKind.Next);
+                return Task.CompletedTask;
             }
 
             public Task Pause()
             {
-                throw new NotImplementedException();
+                Logger.Debug("Pause");
+
+                SendMessage(EventKind.Pause);
+                return Task.CompletedTask;
             }
 
             public Task Play()
             {
-                throw new NotImplementedException();
+                Logger.Debug("Play");
+
+                SendMessage(EventKind.Play);
+                return Task.CompletedTask;
             }
 
             public Task Previous()
             {
-                throw new NotImplementedException();
+                Logger.Debug("Skip previous");
+
+                SendMessage(EventKind.Previous);
+                return Task.CompletedTask;
             }
 
             public Task Stop()
             {
-                throw new NotImplementedException();
+                Logger.Debug("Stop");
+
+                SendMessage(EventKind.Stop);
+                return Task.CompletedTask;
             }
         }
     }

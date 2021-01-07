@@ -5,4 +5,10 @@ export enum Events {
     TimeUpdated,
     Keepalive,
     Closed,
+
+    Next,
+    Previous,
+    Play,
+    Pause,
+    Stop
 }

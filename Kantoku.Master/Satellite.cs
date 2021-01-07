@@ -78,6 +78,7 @@ namespace Kantoku.Master
                     continue;
 
                 outStream.Write(buffer, 0, read);
+                outStream.Flush();
             }
 
             Log("Exited sync read loop");
