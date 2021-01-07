@@ -47,22 +47,16 @@ namespace Kantoku.Master
 
             _ = Task.Run(() => ReadLoop(stdin, ref pipeStream));
 
-            while (true)
-            {
-                using var pipe = new NamedPipeClientStream(".", PipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
+            using var pipe = new NamedPipeClientStream(".", PipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
 
-                Log("Connecting to master...");
+            Log("Connecting to master...");
 
-                pipe.Connect();
+            pipe.Connect();
 
-                Log("Connected");
+            Log("Connected");
 
-                pipeStream = pipe;
-                ReadLoop(pipe, ref stdout);
-
-                Log("Restarting");
-                pipeStream = null;
-            }
+            pipeStream = pipe;
+            ReadLoop(pipe, ref stdout);
         }
 
         private void ReadLoop(Stream inStream, ref Stream? outStream)

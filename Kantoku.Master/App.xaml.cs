@@ -19,15 +19,6 @@ namespace Kantoku.Master
     {
         protected override void OnStartup(StartupEventArgs e)
         {
-            File.WriteAllText("test.txt", string.Join('\n', e.Args));
-
-            if (Satellite.IsAppSatellite(e.Args))
-            {
-                new Satellite().Run();
-                Shutdown();
-                return;
-            }
-
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Verbose()
                 .WriteTo.Debug(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}")
