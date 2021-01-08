@@ -42,8 +42,4 @@
     </None>
   </ItemGroup>
 
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="taskkill /F /FI &quot;IMAGENAME eq Kantoku.Master.exe&quot;" />
-  </Target>
-
 </Project>
