@@ -7,6 +7,8 @@ import { Events } from "./shared";
 
 document.querySelectorAll("video").forEach(el => attachTo(<Element>el));
 
+var background = browser.runtime.connect();
+
 var observer = new MutationObserver((mutations) => {
     for (const mut of mutations) {
         if (mut.type == "childList")
@@ -36,7 +38,7 @@ function attachTo(element: Element) {
             return;
     
         debug("send message", ev, data)
-        browser.runtime.sendMessage([ev, id, ...(data ? [data] : [])])
+        background.postMessage([ev, id, ...(data ? [data] : [])])
     }
 
     function close() {
@@ -67,6 +69,15 @@ function attachTo(element: Element) {
         if (!video.paused)
             sendMessage(Events.Resumed);
     }
+
+    background.onMessage.addListener(msg => {
+        console.log(msg);
+
+        if (!Array.isArray(msg) || msg.length < 2 || msg[1] != id)
+            return;
+        
+        console.log("event", msg[0]);
+    })
 
     window.addEventListener("beforeunload", e => close());
 

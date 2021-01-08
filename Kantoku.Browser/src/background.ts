@@ -1,35 +1,53 @@
 import { browser, Runtime } from "webextension-polyfill-ts";
+import { Events } from "./shared";
 
 //On startup, connect to satellite.
 var port: Runtime.Port | null = connect();
 
+var contentPorts: Runtime.Port[] = [];
+
+var isErrored = false;
+
 function setError(errored: boolean) {
+    if (errored == isErrored)
+        return;
+    
+    isErrored = errored;
     browser.browserAction.setIcon({
         path: errored ? "icons/action_error.png" : "icons/action.png"
     });
 }
+setError(true);
 
 function connect() {
     if (port) {
-        return;
+        return port;
     }
     
     console.log("connecting to satellite");
     port = browser.runtime.connectNative("kantoku");
-    console.log(port);
 
     // Listen for messages from satellite.
-    port.onMessage.addListener((response) => {
-        console.log("Received: ", response);
+    port.onMessage.addListener(msg => {
+        console.log("received", msg);
+
+        if (!Array.isArray(msg))
+            return;
+
+        setError(false);
+        
+        for (const p of contentPorts) {
+            p.postMessage(msg);
+        }
     });
 
     port.onDisconnect.addListener(() => {
         console.log("disconnected");
+
         port = null;
         setError(true);
     });
 
-    setError(false);
     return port
 }
 
@@ -38,7 +56,14 @@ browser.browserAction.onClicked.addListener(() => {
 });
 
 browser.runtime.onMessage.addListener(msg => {
-    if (Array.isArray(msg) && (msg.length == 2 || msg.length == 3) && port) {
+    connect();
+
+    if (Array.isArray(msg) && (msg.length == 2 || msg.length == 3)) {
         port?.postMessage(msg);
     }
 });
+
+browser.runtime.onConnect.addListener(conn => {
+    contentPorts.push(conn);
+    conn.onDisconnect.addListener(() => contentPorts.splice(contentPorts.indexOf(conn), 1))
+})
