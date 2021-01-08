@@ -14,6 +14,9 @@ export default <Fetcher>{
         var urlParams = new URLSearchParams(location.search);
         var videoId = urlParams.get("v");
         
+        console.log(videoId);
+        
+        
         var resp = await axios.get<EmbedData>(`https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/watch?v=${videoId}`);
 
         return {

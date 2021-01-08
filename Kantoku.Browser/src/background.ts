@@ -55,15 +55,17 @@ browser.browserAction.onClicked.addListener(() => {
     connect();
 });
 
-browser.runtime.onMessage.addListener(msg => {
+function onContentMessage(msg: any) {
     connect();
 
     if (Array.isArray(msg) && (msg.length == 2 || msg.length == 3)) {
         port?.postMessage(msg);
     }
-});
+}
 
 browser.runtime.onConnect.addListener(conn => {
     contentPorts.push(conn);
-    conn.onDisconnect.addListener(() => contentPorts.splice(contentPorts.indexOf(conn), 1))
+    
+    conn.onDisconnect.addListener(() => contentPorts.splice(contentPorts.indexOf(conn), 1));
+    conn.onMessage.addListener(onContentMessage);
 })

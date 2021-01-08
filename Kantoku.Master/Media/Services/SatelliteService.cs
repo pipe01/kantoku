@@ -38,6 +38,8 @@ namespace Kantoku.Master.Media.Services
 
         public event EventHandler<ISession> SessionStarted = delegate { };
 
+        private int SatelliteCounter;
+
         private readonly IDictionary<string, Session> Sessions = new Dictionary<string, Session>();
         private readonly IList<NamedPipeServerStream> Servers = new List<NamedPipeServerStream>();
         private readonly ILogger Logger;
@@ -62,13 +64,15 @@ namespace Kantoku.Master.Media.Services
         {
             var pipe = new NamedPipeServerStream("Kantoku", PipeDirection.InOut, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
 
-            Logger.Debug("Starting pipe {Number}", Servers.Count + 1);
+            SatelliteCounter++;
+
+            Logger.Debug("Starting pipe {Number}", SatelliteCounter);
 
             Servers.Add(pipe);
 
             Task.Run(async () =>
             {
-                var logger = Logger.For("Satellite " + Servers.Count);
+                var logger = Logger.For("Satellite " + SatelliteCounter);
 
                 logger.Debug("Waiting for connection");
                 pipe.WaitForConnection();
