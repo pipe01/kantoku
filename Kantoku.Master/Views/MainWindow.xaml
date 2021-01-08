@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Kantoku.Master"
         xmlns:helpers="clr-namespace:Kantoku.Master.Helpers"
-        mc:Ignorable="d" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize" Loaded="Window_Loaded"
+        mc:Ignorable="d" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize"
         Title="Kantoku" Height="234" Width="324">
 
     <Grid Margin="15">

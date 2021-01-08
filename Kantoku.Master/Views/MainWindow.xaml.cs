@@ -8,7 +8,6 @@ namespace Kantoku.Master
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly DashboardViewModel? ViewModel;
         private int SelectionCount;
 
         public MainWindow()
@@ -17,13 +16,7 @@ namespace Kantoku.Master
         }
         public MainWindow(DashboardViewModel viewModel) : this()
         {
-            this.DataContext = ViewModel = viewModel;
-        }
-
-        private async void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            if (ViewModel != null)
-                await ViewModel.Start();
+            this.DataContext = viewModel;
         }
 
         private void ContextMenu_ContextMenuOpening(object sender, System.Windows.Controls.ContextMenuEventArgs e)
