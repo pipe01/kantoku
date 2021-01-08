@@ -3,6 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Kantoku.Mobile.App">
     <Application.Resources>
-
+        <OnPlatform x:TypeArguments="x:String" x:Key="FontAwesomeSolid">
+            <On Platform="Android" Value="Fonts/fa-solid-900.ttf#Font Awesome 5 Free Solid" />
+        </OnPlatform>
+        <OnPlatform x:TypeArguments="x:String" x:Key="FontAwesomeRegular">
+            <On Platform="Android" Value="Fonts/fa-regular-400.ttf#Font Awesome 5 Free Regular" />
+        </OnPlatform>
     </Application.Resources>
 </Application>
