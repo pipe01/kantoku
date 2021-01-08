@@ -91,7 +91,7 @@ class Session {
         this.close();
         
         // Fetch session media info
-        const media = await fetchInfo();
+        const media = await fetchInfo(this.video);
         if (!media) {
             debug("failed to fetch media info");
             return;
@@ -100,6 +100,7 @@ class Session {
         if (!media.duration) {
             media.duration = this.video.duration;
         }
+        debug("media info", media);
 
         // Generate an ID derived from the current time
         var date = new Date();
@@ -130,7 +131,7 @@ function attachTo(element: Element) {
     if (element.tagName != "VIDEO")
         return;
 
-    console.log(Session);
+    debug("attach to", element);
     
     new Session(<HTMLVideoElement>element).start();
 }
