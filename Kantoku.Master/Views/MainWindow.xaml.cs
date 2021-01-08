@@ -1,5 +1,6 @@
 ﻿using Kantoku.Master.ViewModels;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace Kantoku.Master
 {
@@ -19,13 +20,13 @@ namespace Kantoku.Master
             this.DataContext = viewModel;
         }
 
-        private void ContextMenu_ContextMenuOpening(object sender, System.Windows.Controls.ContextMenuEventArgs e)
+        private void ContextMenu_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
             if (SelectionCount == 0)
                 e.Handled = true;
         }
 
-        private void ListView_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             SelectionCount += e.AddedItems.Count;
             SelectionCount -= e.RemovedItems.Count;
