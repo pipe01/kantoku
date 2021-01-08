@@ -169,9 +169,13 @@ namespace Kantoku.Master.Media.Services
 
         private void Session_Closed(ISession session)
         {
-            Logger.Debug("Closed session ID {ID}", session.ID);
+            using (session)
+            {
+                Logger.Debug("Closed session ID {ID}", session.ID);
 
-            session.Closed -= Session_Closed;
+                Sessions.Remove(((Session)session).BrowserID);
+                session.Closed -= Session_Closed;
+            }
         }
 
         private record BrowserMediaInfo(string Title, string Author, string IconUrl, string AppName, double Duration);
@@ -188,12 +192,14 @@ namespace Kantoku.Master.Media.Services
 
             public MediaInfo? Media { get; private set; }
 
+            public string BrowserID { get; }
+
             public event SessionEventHandler Closed = delegate { };
             public event PropertyChangedEventHandler? PropertyChanged;
 
             private readonly ILogger Logger;
             private readonly MessageWriter Writer;
-            private readonly string BrowserID;
+            private readonly Debouncer DeadDebouncer;
 
             public Session(ILogger rootLogger, NamedPipeServerStream pipe, string browserID)
             {
@@ -201,6 +207,9 @@ namespace Kantoku.Master.Media.Services
                 this.Logger = rootLogger.For("Satellite Session " + ID);
                 this.Writer = new MessageWriter(pipe);
                 this.BrowserID = browserID;
+                this.DeadDebouncer = new Debouncer(4000);
+
+                DeadDebouncer.Idled += DeadDebouncer_Idled;
             }
 
             public void Dispose()
@@ -210,6 +219,8 @@ namespace Kantoku.Master.Media.Services
 
             public void HandleMessage(EventKind kind, JsonElement data)
             {
+                DeadDebouncer.Trigger();
+
                 switch (kind)
                 {
                     case EventKind.Started:
@@ -258,6 +269,11 @@ namespace Kantoku.Master.Media.Services
 
                         break;
                 }
+            }
+
+            private void DeadDebouncer_Idled(object? sender, EventArgs e)
+            {
+                Closed(this);
             }
 
             private void SendMessage(EventKind kind)
