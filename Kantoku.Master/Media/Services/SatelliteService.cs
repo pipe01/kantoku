@@ -211,7 +211,7 @@ namespace Kantoku.Master.Media.Services
                 this.Logger = rootLogger.For("Satellite Session " + ID);
                 this.Writer = writer;
                 this.BrowserID = browserID;
-                this.DeadDebouncer = new Debouncer(4000);
+                this.DeadDebouncer = new Debouncer(10000);
 
                 DeadDebouncer.Idled += DeadDebouncer_Idled;
             }
