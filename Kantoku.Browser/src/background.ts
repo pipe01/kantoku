@@ -46,6 +46,8 @@ function connect() {
 
         port = null;
         setError(true);
+
+        setTimeout(connect, 1000);
     });
 
     return port

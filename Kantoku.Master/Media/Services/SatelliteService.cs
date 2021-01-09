@@ -77,6 +77,10 @@ namespace Kantoku.Master.Media.Services
                 logger.Debug("Waiting for connection");
                 pipe.WaitForConnection();
 
+                using var writer = new MessageWriter(pipe);
+
+                writer.Write(EventKind.Keepalive);
+
                 try
                 {
                     StartPipe();
@@ -90,7 +94,7 @@ namespace Kantoku.Master.Media.Services
                 {
                     logger.Debug("Starting read loop");
 
-                    await ReadLoop(pipe, logger);
+                    await ReadLoop(pipe, writer, logger);
                 }
                 finally
                 {
@@ -102,7 +106,7 @@ namespace Kantoku.Master.Media.Services
             });
         }
 
-        private async Task ReadLoop(NamedPipeServerStream pipe, ILogger logger)
+        private async Task ReadLoop(NamedPipeServerStream pipe, MessageWriter writer, ILogger logger)
         {
             var reader = new MessageReader(pipe);
 
@@ -112,7 +116,7 @@ namespace Kantoku.Master.Media.Services
 
                 try
                 {
-                    HandleMessage(pipe, item.RootElement);
+                    HandleMessage(pipe, writer, item.RootElement);
                 }
                 finally
                 {
@@ -123,7 +127,7 @@ namespace Kantoku.Master.Media.Services
             logger.Verbose("Exited read loop");
         }
 
-        private void HandleMessage(NamedPipeServerStream pipe, JsonElement data)
+        private void HandleMessage(NamedPipeServerStream pipe, MessageWriter writer, JsonElement data)
         {
             Logger.Debug("Handling message {Message}", data);
 
@@ -149,7 +153,7 @@ namespace Kantoku.Master.Media.Services
                     return;
                 }
 
-                session = new Session(Logger, pipe, id);
+                session = new Session(Logger, writer, id);
                 session.Closed += Session_Closed;
 
                 Logger.Debug("Created session ID {ID}", session.ID);
@@ -201,11 +205,11 @@ namespace Kantoku.Master.Media.Services
             private readonly MessageWriter Writer;
             private readonly Debouncer DeadDebouncer;
 
-            public Session(ILogger rootLogger, NamedPipeServerStream pipe, string browserID)
+            public Session(ILogger rootLogger, MessageWriter writer, string browserID)
             {
                 this.ID = Guid.NewGuid();
                 this.Logger = rootLogger.For("Satellite Session " + ID);
-                this.Writer = new MessageWriter(pipe);
+                this.Writer = writer;
                 this.BrowserID = browserID;
                 this.DeadDebouncer = new Debouncer(4000);
 
@@ -214,7 +218,6 @@ namespace Kantoku.Master.Media.Services
 
             public void Dispose()
             {
-                Writer.Dispose();
             }
 
             public void HandleMessage(EventKind kind, JsonElement data)
