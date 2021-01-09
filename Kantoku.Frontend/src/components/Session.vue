@@ -54,8 +54,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "node_modules/bulma/sass/helpers/flexbox";
-
 section {
     width: 100vw;
 }
