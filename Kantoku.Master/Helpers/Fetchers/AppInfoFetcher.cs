@@ -66,14 +66,20 @@ namespace Kantoku.Master.Helpers.Fetchers
 
         private async Task<AppInfo> FetchModern(string appId)
         {
+            Logger.Debug("App is modern");
+
             var (success, appName, iconPath) = await ModernFetcher.FetchInfo(appId);
 
             if (!success)
             {
+                Logger.Verbose("Couldn't find info for app");
+
                 return new AppInfo(appId, EmptyImage);
             }
             else
             {
+                Logger.Verbose("Found info for app");
+
                 var image = new BitmapImage(new Uri(iconPath));
                 image.Freeze();
 
