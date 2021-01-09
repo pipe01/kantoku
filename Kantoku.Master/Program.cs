@@ -1,14 +1,13 @@
-﻿using Kantoku.Master.Helpers;
+﻿using Kantoku.Master.Frontend;
+using Kantoku.Master.Helpers;
 using Kantoku.Master.Helpers.Fetchers;
 using Kantoku.Master.Media.Services;
 using Kantoku.Master.ViewModels;
 using LightInject;
 using Serilog;
 using System;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using TypeFinder;
 
 namespace Kantoku.Master
@@ -37,7 +36,13 @@ namespace Kantoku.Master
             {
                 container.RegisterInstance(SynchronizationContext.Current);
 
-                _ = container.GetInstance<DashboardViewModel>().Start();
+                Task.Run(async () =>
+                {
+                    foreach (var item in container.GetAllInstances<IHosted>())
+                    {
+                        await item.Start();
+                    }
+                });
             };
             app.Run();
         }
@@ -60,6 +65,7 @@ namespace Kantoku.Master
             container.RegisterInstance(Config.Load("config.yaml"));
             container.Register<IServiceManager, ServiceManager>();
             container.Register<IAppInfoFetcher, AppInfoFetcher>();
+            container.Register<IServer, Server>();
 
             container.RegisterSingleton<DashboardViewModel>();
             container.RegisterSingleton<MainWindow>();

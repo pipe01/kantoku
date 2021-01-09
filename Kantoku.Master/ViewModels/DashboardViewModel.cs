@@ -1,13 +1,13 @@
-﻿using Kantoku.Master.Media;
+﻿using Kantoku.Master.Helpers;
+using Kantoku.Master.Media;
 using Kantoku.Master.Media.Services;
 using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Threading;
 
 namespace Kantoku.Master.ViewModels
 {
-    public class DashboardViewModel
+    public class DashboardViewModel : IHosted
     {
         public ObservableCollection<SessionViewModel> Sessions { get; set; } = new ObservableCollection<SessionViewModel>();
 
