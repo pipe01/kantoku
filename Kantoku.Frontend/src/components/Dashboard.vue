@@ -16,9 +16,14 @@
 import { defineComponent } from 'vue';
 import Session from "./Session.vue";
 
+import { provideApi } from "../api";
+
 export default defineComponent({
     components: {
         Session
+    },
+    setup() {
+        provideApi();
     }
 })
 </script>

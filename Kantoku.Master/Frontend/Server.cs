@@ -48,12 +48,12 @@ namespace Kantoku.Master.Frontend
         private class Behaviour : WebSocketBehavior
         {
             private readonly DashboardViewModel Dashboard;
-            private readonly ILogger Logger;
+            private ILogger Logger;
 
             public Behaviour(DashboardViewModel dashboard, ILogger logger)
             {
                 this.Dashboard = dashboard;
-                this.Logger = logger.For($"Websocket {ID}");
+                this.Logger = logger;
             }
 
             private void Send(EventKind kind, object? data = null)
@@ -67,6 +67,7 @@ namespace Kantoku.Master.Frontend
 
             protected override void OnOpen()
             {
+                Logger = Logger.For($"Websocket {ID}");
                 Logger.Debug("Opened connection");
 
                 Dashboard.Sessions.CollectionChanged += Sessions_CollectionChanged;
@@ -104,7 +105,7 @@ namespace Kantoku.Master.Frontend
 
                     foreach (SessionViewModel item in e.OldItems)
                     {
-                        Send(EventKind.SessionEnd, new { id = item.Session.ID });
+                        Send(EventKind.SessionEnd, item.Session.ID);
                     }
                 }
             }
