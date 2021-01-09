@@ -6,7 +6,7 @@ section.is-flex.is-flex-direction-column.is-align-items-center.px-5
     span.is-size-4.has-text-centered.has-text-weight-bold.mt-5 {{session.media.author}}
     span.is-size-5.has-text-centered.mb-5 {{session.media.title}}
     input.slider.is-fullwidth.is-small.is-circle.my-1(type="range" step="1" min="0" max="1000" :value="sliderValue")
-    span.mb-2 {{session.position}}
+    span.mb-2 {{formatTime(session.position)}} / {{formatTime(session.media?.duration)}}
 
     .controls
         button.button.is-large(@click="api.previous")
@@ -39,7 +39,16 @@ export default defineComponent({
         const sliderValue = computed(() => (props.session.position / props.session.media.duration) * 1000);
         const sessionApi = computed(() => api?.forSession(props.session.id));
 
-        return { sliderValue, api: sessionApi }
+        function formatTime(n: number) {
+            const min = Math.floor(n / 60);
+            const sec = Math.floor(n % 60);
+
+            const format = (a: number) => a.toLocaleString(undefined, {minimumIntegerDigits: 2});
+
+            return `${format(min)}:${format(sec)}`;
+        }
+
+        return { sliderValue, api: sessionApi, formatTime }
     }
 })
 </script>
