@@ -56,36 +56,44 @@ class ApiClient {
         }
     }
 
-    private sendMessage(kind: models.EventKind, data?: any) {
+    private sendMessage(kind: models.EventKind, data?: any, session?: string) {
         const ev: models.Event = { kind }
         if (data) {
             ev.data = data;
+        }
+        if (session) {
+            ev.session = session;
         }
 
         this.ws.send(JSON.stringify(ev))
     }
 
-    public pause() {
-        this.sendMessage(models.EventKind.Pause);
-    }
+    public forSession(id: string) {
+        const _this = this;
 
-    public play() {
-        this.sendMessage(models.EventKind.Play);
-    }
+        function sendMessage(kind: models.EventKind, data?: any) {
+            _this.sendMessage(kind, data, id);
+        }
 
-    public stop() {
-        this.sendMessage(models.EventKind.Stop);
-    }
-
-    public previous() {
-        this.sendMessage(models.EventKind.Previous);
-    }
-
-    public next() {
-        this.sendMessage(models.EventKind.Next);
-    }
-
-    public setPosition(pos: number) {
-        this.sendMessage(models.EventKind.SetPosition, pos);
+        return {
+            pause() {
+                sendMessage(models.EventKind.Pause);
+            },
+            play() {
+                sendMessage(models.EventKind.Play);
+            },
+            stop() {
+                sendMessage(models.EventKind.Stop);
+            },
+            previous() {
+                sendMessage(models.EventKind.Previous);
+            },
+            next() {
+                sendMessage(models.EventKind.Next);
+            },
+            setPosition(pos: number) {
+                sendMessage(models.EventKind.SetPosition, pos);
+            }
+        }
     }
 }

@@ -14,6 +14,7 @@ export enum EventKind {
 export interface Event {
     kind: EventKind;
     data?: any;
+    session?: string;
 }
 
 export interface Session {

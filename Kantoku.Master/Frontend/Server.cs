@@ -1,5 +1,6 @@
 ﻿using Kantoku.Master.Helpers;
 using Kantoku.Master.Media;
+using Kantoku.Master.Media.Services;
 using Kantoku.Master.ViewModels;
 using LightInject;
 using Serilog;
@@ -50,13 +51,16 @@ namespace Kantoku.Master.Frontend
         {
             private event Action Closed = delegate { };
 
-            private readonly DashboardViewModel Dashboard;
             private ILogger Logger;
 
-            public Behaviour(DashboardViewModel dashboard, ILogger logger)
+            private readonly DashboardViewModel Dashboard;
+            private readonly IServiceManager ServiceManager;
+
+            public Behaviour(DashboardViewModel dashboard, ILogger logger, IServiceManager serviceManager)
             {
                 this.Dashboard = dashboard;
                 this.Logger = logger;
+                this.ServiceManager = serviceManager;
             }
 
             private void Send(EventKind kind, object? data = null)
@@ -93,6 +97,37 @@ namespace Kantoku.Master.Frontend
             protected override void OnMessage(MessageEventArgs e)
             {
                 Logger.Debug("Received message");
+
+                var ev = JsonSerializer.Deserialize<Event>(e.Data);
+                if (ev?.Session == null)
+                    return;
+
+                if (!Guid.TryParse(ev.Session, out var id))
+                    return;
+
+                if (!ServiceManager.Sessions.TryGetValue(id, out var session))
+                    return;
+
+                switch (ev.Kind)
+                {
+                    case EventKind.Pause:
+                        session.Pause();
+                        break;
+                    case EventKind.Play:
+                        session.Play();
+                        break;
+                    case EventKind.Stop:
+                        session.Stop();
+                        break;
+                    case EventKind.Previous:
+                        session.Previous();
+                        break;
+                    case EventKind.Next:
+                        session.Next();
+                        break;
+                    //case EventKind.SetPosition:
+                    //    break;
+                }
             }
 
             private void Sessions_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

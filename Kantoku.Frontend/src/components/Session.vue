@@ -34,11 +34,12 @@ export default defineComponent({
         }
     },
     setup(props) {
-        const sliderValue = computed(() => (props.session.position / props.session.media.duration) * 1000);
-
         const api = useApi();
 
-        return { sliderValue, api }
+        const sliderValue = computed(() => (props.session.position / props.session.media.duration) * 1000);
+        const sessionApi = computed(() => api?.forSession(props.session.id));
+
+        return { sliderValue, api: sessionApi }
     }
 })
 </script>

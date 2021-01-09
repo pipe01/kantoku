@@ -23,6 +23,9 @@ namespace Kantoku.Master.Frontend
 
         [JsonPropertyName("data")]
         public object? Data { get; set; }
+        
+        [JsonPropertyName("session")]
+        public string? Session { get; set; }
 
         public Event()
         {

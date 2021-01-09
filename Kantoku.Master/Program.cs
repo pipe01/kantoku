@@ -86,12 +86,12 @@ namespace Kantoku.Master
             container.RegisterInstance<IServiceContainer>(container);
 
             container.Register(typeof(ILogger<>), typeof(Logger<>));
-
             container.RegisterInstance(Log.Logger);
             container.RegisterInstance(Config.Load("config.yaml"));
-            container.Register<IServiceManager, ServiceManager>();
-            container.Register<IAppInfoFetcher, AppInfoFetcher>();
-            container.Register<IServer, Server>();
+
+            container.RegisterSingleton<IServiceManager, ServiceManager>();
+            container.RegisterSingleton<IAppInfoFetcher, AppInfoFetcher>();
+            container.RegisterSingleton<IServer, Server>();
 
             container.RegisterSingleton<DashboardViewModel>();
             container.RegisterSingleton<MainWindow>();
