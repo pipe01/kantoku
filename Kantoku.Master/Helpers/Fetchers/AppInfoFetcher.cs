@@ -1,22 +1,26 @@
 ﻿using Serilog;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace Kantoku.Master.Helpers.Fetchers
 {
     public interface IAppInfoFetcher
     {
-        AppInfo FetchInfo(string appId);
+        Task<AppInfo> FetchInfo(string appId);
     }
 
     public sealed class AppInfoFetcher : IAppInfoFetcher
     {
+        private static readonly BitmapSource EmptyImage = BitmapSource.Create(2, 2, 96, 96, PixelFormats.Indexed1, new BitmapPalette(new List<Color> { Colors.Transparent }), new byte[] { 0, 0, 0, 0 }, 1);
+
         private readonly ILogger Logger;
 
         public AppInfoFetcher(ILogger logger)
@@ -24,14 +28,14 @@ namespace Kantoku.Master.Helpers.Fetchers
             this.Logger = logger.For<AppInfoFetcher>();
         }
 
-        public AppInfo FetchInfo(string appId)
+        public async Task<AppInfo> FetchInfo(string appId)
         {
             Logger.Debug("Fetching app info for {App}", appId);
 
             if (IsWin32(appId))
                 return FetchWin32(appId);
             else
-                return FetchModern(appId);
+                return await FetchModern(appId);
         }
 
         private static bool IsWin32(string appId) => Path.GetExtension(appId).Equals(".exe", StringComparison.OrdinalIgnoreCase);
@@ -60,12 +64,21 @@ namespace Kantoku.Master.Helpers.Fetchers
             return new AppInfo(appName, iconSource);
         }
 
-        private AppInfo FetchModern(string appId)
+        private async Task<AppInfo> FetchModern(string appId)
         {
-            var img = new BitmapImage();
-            img.Freeze();
+            var (success, appName, iconPath) = await ModernFetcher.FetchInfo(appId);
 
-            return new AppInfo(appId, img);
+            if (!success)
+            {
+                return new AppInfo(appId, EmptyImage);
+            }
+            else
+            {
+                var image = new BitmapImage(new Uri(iconPath));
+                image.Freeze();
+
+                return new AppInfo(appName, image);
+            }
         }
     }
 }

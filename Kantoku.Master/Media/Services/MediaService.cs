@@ -137,7 +137,7 @@ namespace Kantoku.Master.Media.Services
 
             public static async Task<Session> CreateNew(GSMTCSession gsmtcSession, ILogger rootLogger, IAppInfoFetcher appInfoFetcher)
             {
-                var appInfo = appInfoFetcher.FetchInfo(gsmtcSession.SourceAppUserModelId);
+                var appInfo = await appInfoFetcher.FetchInfo(gsmtcSession.SourceAppUserModelId);
 
                 var session = new Session(gsmtcSession, rootLogger, appInfo);
                 await session.LoadInfo();
