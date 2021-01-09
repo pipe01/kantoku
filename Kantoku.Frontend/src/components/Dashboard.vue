@@ -5,8 +5,11 @@
             .container
                 h1.title.has-text-light Kantoku
 
-    .is-flex.is-flex-direction-column.is-flex-grow-1.is-justify-content-center.mx-5
-        Session
+    .sessions.is-flex-grow-1.is-flex.is-align-items-center
+        div
+            Session
+        div
+            Session
 </template>
 
 <script lang="ts">
@@ -23,5 +26,15 @@ export default defineComponent({
 <style lang="scss" scoped>
 .blue-back {
     background: #1561C2;
+}
+
+.sessions {
+    overflow-x: scroll;
+    scroll-snap-type: x mandatory;
+
+    & > * {
+        display: table-cell;
+        scroll-snap-align: start;
+    }
 }
 </style>
