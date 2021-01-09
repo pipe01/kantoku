@@ -9,16 +9,21 @@ import (
 )
 
 func main() {
+	var pipeWriter io.Writer
+	go copy(os.Stdin, &pipeWriter)
+
 	pipe, err := npipe.Dial(`\\.\pipe\Kantoku`)
 	if err != nil {
 		log.Fatalf("failed to open pipe: %s", err)
 	}
 
-	go copy(os.Stdin, pipe)
-	copy(pipe, os.Stdout)
+	pipeWriter = pipe
+
+	var stdout io.Writer = os.Stdout
+	copy(pipe, &stdout)
 }
 
-func copy(r io.Reader, w io.Writer) {
+func copy(r io.Reader, w *io.Writer) {
 	buf := make([]byte, 1024)
 
 	for {
@@ -27,6 +32,8 @@ func copy(r io.Reader, w io.Writer) {
 			break
 		}
 
-		w.Write(buf[:read])
+		if *w != nil {
+			(*w).Write(buf[:read])
+		}
 	}
 }
