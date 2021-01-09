@@ -1,7 +1,7 @@
 <template lang="pug">
 section.is-flex.is-flex-direction-column.is-align-items-center.px-5
     figure.image.is-96x96
-        img.is-rounded(v-if="session.app" :src="session.app.icon")
+        img.is-rounded(v-if="session.app" :src="session.app.icon" :title="session.app.name")
     
     span.is-size-4.has-text-centered.has-text-weight-bold.mt-5 {{session.media.author}}
     span.is-size-5.has-text-centered.mb-5 {{session.media.title}}

@@ -3,6 +3,11 @@
 @import 'node_modules/bulma-slider/src/sass';
 
 html, body, #app, .h-100 {
+    @extend .h-100;
+    overflow: hidden;
+}
+
+.h-100 {
     height: 100%;
 }
 
