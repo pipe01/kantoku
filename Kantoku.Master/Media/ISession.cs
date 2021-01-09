@@ -5,11 +5,9 @@ using System.Threading.Tasks;
 
 namespace Kantoku.Master.Media
 {
-    public delegate void SessionEventHandler(ISession session);
-
     public interface ISession : IDisposable, INotifyPropertyChanged
     {
-        event SessionEventHandler Closed;
+        event Action Closed;
 
         Guid ID { get; }
         AppInfo? App { get; }

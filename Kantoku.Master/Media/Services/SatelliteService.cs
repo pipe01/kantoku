@@ -160,6 +160,17 @@ namespace Kantoku.Master.Media.Services
                 Sessions.Add(id, session);
 
                 OnSessionStarted(session);
+
+                void Session_Closed()
+                {
+                    using (session)
+                    {
+                        Logger.Debug("Closed session ID {ID}", session!.ID);
+
+                        Sessions.Remove(session.BrowserID);
+                        session.Closed -= Session_Closed;
+                    }
+                }
             }
 
             if (session == null && !Sessions.TryGetValue(id, out session))
@@ -169,17 +180,6 @@ namespace Kantoku.Master.Media.Services
             }
 
             this.SynchronizationContext.Send(() => session.HandleMessage(eventKind, arrayData.Length > 2 ? arrayData[2] : default));
-        }
-
-        private void Session_Closed(ISession session)
-        {
-            using (session)
-            {
-                Logger.Debug("Closed session ID {ID}", session.ID);
-
-                Sessions.Remove(((Session)session).BrowserID);
-                session.Closed -= Session_Closed;
-            }
         }
 
         private record BrowserMediaInfo(string Title, string Author, string IconUrl, string AppName, double Duration);
@@ -198,7 +198,7 @@ namespace Kantoku.Master.Media.Services
 
             public string BrowserID { get; }
 
-            public event SessionEventHandler Closed = delegate { };
+            public event Action Closed = delegate { };
             public event PropertyChangedEventHandler? PropertyChanged;
 
             private readonly ILogger Logger;
@@ -244,7 +244,7 @@ namespace Kantoku.Master.Media.Services
                         break;
 
                     case EventKind.Closed:
-                        Closed(this);
+                        Closed();
                         break;
 
                     case EventKind.Paused:
@@ -276,7 +276,7 @@ namespace Kantoku.Master.Media.Services
 
             private void DeadDebouncer_Idled(object? sender, EventArgs e)
             {
-                Closed(this);
+                Closed();
             }
 
             private void SendMessage(EventKind kind)

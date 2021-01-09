@@ -6,10 +6,8 @@
                 h1.title.has-text-light Kantoku
 
     .sessions.is-flex-grow-1.is-flex.is-align-items-center
-        div
-            Session
-        div
-            Session
+        div(v-for="session in sessions")
+            Session(:session="session")
 </template>
 
 <script lang="ts">
@@ -23,7 +21,9 @@ export default defineComponent({
         Session
     },
     setup() {
-        provideApi();
+        const api = provideApi();
+
+        return { sessions: api.sessions }
     }
 })
 </script>

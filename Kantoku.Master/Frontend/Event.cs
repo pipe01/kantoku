@@ -5,7 +5,8 @@ namespace Kantoku.Master.Frontend
     public enum EventKind
     {
         SessionStart,
-        SessionEnd
+        SessionEnd,
+        SessionUpdate,
     }
 
     public class Event

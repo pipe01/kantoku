@@ -43,10 +43,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Frontend\API\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Libraries\websocket-sharp\websocket-sharp\websocket-sharp.csproj" />
   </ItemGroup>
 

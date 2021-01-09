@@ -84,7 +84,7 @@ namespace Kantoku.Master.Media.Services
 
             Logger.Debug("Started session with ID {ID}, app ID {Model}, hash {Hash}", session.ID, gsmtcSession.SourceAppUserModelId, gsmtcSession.GetHashCode());
 
-            session.Closed += session =>
+            session.Closed += () =>
             {
                 Logger.Debug("Removing session ID {ID}", session.ID);
                 Sessions.Remove(gsmtcSession);
@@ -109,7 +109,7 @@ namespace Kantoku.Master.Media.Services
             public AppInfo App { get; }
 
             public event PropertyChangedEventHandler? PropertyChanged;
-            public event SessionEventHandler Closed = delegate { };
+            public event Action Closed = delegate { };
 
             private readonly GSMTCSession GSMTCSession;
             private readonly ILogger Logger;
@@ -227,7 +227,7 @@ namespace Kantoku.Master.Media.Services
                 Logger.Debug("Closing session");
 
                 IsClosed = true;
-                Closed(this);
+                Closed();
             }
 
             public async Task Pause()

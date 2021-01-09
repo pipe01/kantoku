@@ -5,6 +5,7 @@ using LightInject;
 using Serilog;
 using System;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -47,6 +48,8 @@ namespace Kantoku.Master.Frontend
 
         private class Behaviour : WebSocketBehavior
         {
+            private event Action Closed = delegate { };
+
             private readonly DashboardViewModel Dashboard;
             private ILogger Logger;
 
@@ -58,7 +61,8 @@ namespace Kantoku.Master.Frontend
 
             private void Send(EventKind kind, object? data = null)
             {
-                Logger.Verbose("Sending event {Kind}", kind);
+                if (kind != EventKind.SessionUpdate)
+                    Logger.Verbose("Sending event {Kind}", kind);
 
                 var json = JsonSerializer.Serialize(new Event(kind, data));
 
@@ -81,6 +85,9 @@ namespace Kantoku.Master.Frontend
             protected override void OnClose(CloseEventArgs e)
             {
                 Logger.Debug("Closed connection");
+
+                Dashboard.Sessions.CollectionChanged -= Sessions_CollectionChanged;
+                Closed();
             }
 
             protected override void OnMessage(MessageEventArgs e)
@@ -110,45 +117,83 @@ namespace Kantoku.Master.Frontend
                 }
             }
 
-            private static object SerializeSession(ISession session)
+            private void OnStartedSession(ISession session)
+            {
+                Send(EventKind.SessionStart, SerializeSession(session));
+
+                MediaInfo? oldMedia = null;
+
+                session.PropertyChanged += Session_PropertyChanged;
+                session.Closed += Session_Closed;
+                this.Closed += Session_Closed;
+                SubscribeMedia(session);
+
+                void Session_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+                {
+                    Send(EventKind.SessionUpdate, SerializeSession(session, false));
+
+                    if (e.PropertyName == nameof(ISession.Media))
+                        SubscribeMedia(session);
+                }
+
+                void Session_Closed()
+                {
+                    this.Closed -= Session_Closed;
+
+                    session.PropertyChanged -= Session_PropertyChanged;
+                    session.Closed -= Session_Closed;
+
+                    if (session.Media != null)
+                        session.Media.PropertyChanged -= Media_PropertyChanged;
+                }
+
+                void SubscribeMedia(ISession session)
+                {
+                    if (oldMedia != null)
+                        oldMedia.PropertyChanged -= Media_PropertyChanged;
+                    oldMedia = session.Media;
+
+                    if (session.Media != null)
+                        session.Media.PropertyChanged += Media_PropertyChanged;
+                }
+
+                void Media_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+                {
+                    Send(EventKind.SessionUpdate, new
+                    {
+                        id = session.ID,
+                        media = session.Media == null ? null : SerializeMedia(session.Media)
+                    });
+                }
+            }
+
+            #region Serialization
+            private static object SerializeSession(ISession session, bool includeIcon = true)
             {
                 return new
                 {
                     id = session.ID,
-                    media = session.Media == null ? null : new
-                    {
-                        title = session.Media.Title,
-                        duration = session.Media.Duration.TotalSeconds
-                    },
+                    media = session.Media == null ? null : SerializeMedia(session.Media),
                     app = session.App == null ? null : new
                     {
                         name = session.App.Name,
-                        icon = Base64ImageEncoder.Encode(session.App.Icon)
+                        icon = !includeIcon ? null : "data:image/png;base64, " + Base64ImageEncoder.Encode(session.App.Icon)
                     },
                     position = session.Position.TotalSeconds,
                     isPlaying = session.IsPlaying
                 };
             }
 
-            private void OnStartedSession(ISession session)
+            private static object SerializeMedia(MediaInfo media)
             {
-                Send(EventKind.SessionStart, SerializeSession(session));
-
-                session.PropertyChanged += Session_PropertyChanged;
-            }
-
-            private void Session_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-            {
-                if (sender == null || sender is not ISession session)
-                    throw new ArgumentException("Invalid event sender");
-
-                switch (e.PropertyName)
+                return new
                 {
-                    case nameof(ISession.Media):
-                        
-                        break;
-                }
+                    title = media.Title,
+                    author = media.Author,
+                    duration = media.Duration.TotalSeconds
+                };
             }
+            #endregion
         }
     }
 }
