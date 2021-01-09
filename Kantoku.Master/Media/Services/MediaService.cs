@@ -193,12 +193,14 @@ namespace Kantoku.Master.Media.Services
 
             private void ReloadTimeline()
             {
-                LastKnownPosition = GSMTCSession.GetTimelineProperties().Position;
+                var timeline = GSMTCSession.GetTimelineProperties();
+
+                LastKnownPosition = timeline.Position;
 
                 OnPropertyChanged(nameof(Position));
 
                 if (Media != null)
-                    Media.Duration = GSMTCSession.GetTimelineProperties().EndTime;
+                    Media.Duration = timeline.EndTime;
             }
 
             public void Dispose()
