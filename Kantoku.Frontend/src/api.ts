@@ -65,7 +65,7 @@ class ApiClient {
                 const data = ev.data as models.Session;
                 
                 const session = this.sessions[ev.data.id];
-                const icon = session.app.icon;
+                const icon = session.app?.icon;
                 
                 Object.assign(session, ev.data);
 
