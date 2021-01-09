@@ -21,6 +21,8 @@ namespace Kantoku.Master.Helpers.Fetchers
     {
         private static readonly BitmapSource EmptyImage = BitmapSource.Create(2, 2, 96, 96, PixelFormats.Indexed1, new BitmapPalette(new List<Color> { Colors.Transparent }), new byte[] { 0, 0, 0, 0 }, 1);
 
+        private static readonly string CustomInfoFolder = Path.GetFullPath("custom");
+
         private readonly ILogger Logger;
 
         public AppInfoFetcher(ILogger logger)
@@ -32,13 +34,37 @@ namespace Kantoku.Master.Helpers.Fetchers
         {
             Logger.Debug("Fetching app info for {App}", appId);
 
-            if (IsWin32(appId))
-                return FetchWin32(appId);
-            else
-                return await FetchModern(appId);
+            var (customName, customIcon) = FetchFromCustom(appId);
+
+            var fetched = IsWin32(appId) ? FetchWin32(appId) : await FetchModern(appId);
+
+            return new AppInfo(customName ?? fetched.Name, customIcon ?? fetched.Icon);
         }
 
         private static bool IsWin32(string appId) => Path.GetExtension(appId).Equals(".exe", StringComparison.OrdinalIgnoreCase);
+
+        private (string? AppName, BitmapSource? Icon) FetchFromCustom(string appId)
+        {
+            string? appName = null;
+            BitmapSource? icon = null;
+
+            if (!Directory.Exists(CustomInfoFolder))
+                goto exit;
+
+            var appNameFile = new FileInfo(Path.Combine(CustomInfoFolder, appId + ".txt"));
+            if (appNameFile.Exists)
+                appName = File.ReadAllText(appNameFile.FullName);
+
+            var iconFile = new FileInfo(Path.Combine(CustomInfoFolder, appId + ".png"));
+            if (iconFile.Exists)
+            {
+                icon = new BitmapImage(new Uri(iconFile.FullName));
+                icon.Freeze();
+            }
+
+            exit:
+            return (appName, icon);
+        }
 
         private AppInfo FetchWin32(string appId)
         {
