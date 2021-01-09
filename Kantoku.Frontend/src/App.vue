@@ -13,8 +13,3 @@ export default defineComponent({
     }
 })
 </script>
-
-<style lang="scss">
-@charset "utf-8";
-@import "node_modules/bulma/bulma";
-</style>
