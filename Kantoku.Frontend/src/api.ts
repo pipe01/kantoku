@@ -24,16 +24,26 @@ class ApiClient {
     }
 
     private connect() {
-        const ws = new WebSocket(process.env.NODE_ENV == "development" ? `ws://192.168.1.33:4545/ws` : `ws://${location.host}/ws`);
+        this.clearSessions();
 
-        ws.addEventListener("message", msg => this.handleMessage(msg));
-        ws.addEventListener("open", () => this.connected.value = true);
-        ws.addEventListener("close", () => {
+        this.ws = new WebSocket(process.env.NODE_ENV == "development" ? `ws://192.168.1.33:4545/ws` : `ws://${location.host}/ws`);
+
+        this.ws.addEventListener("message", msg => this.handleMessage(msg));
+        this.ws.addEventListener("open", () => this.connected.value = true);
+        this.ws.addEventListener("close", () => {
             this.connected.value = false;
+            this.clearSessions();
+
             setTimeout(() => this.connect(), 5000);
         });
     }
 
+    private clearSessions() {
+        for (const id in this.sessions) {
+            delete this.sessions[id];
+        }
+    }
+    
     private handleMessage(msg: MessageEvent) {
         const ev: models.Event = JSON.parse(msg.data);
 
@@ -79,6 +89,9 @@ class ApiClient {
 
     public forSession(id: string) {
         const _this = this;
+
+        console.log(this, id);
+        
 
         function sendMessage(kind: models.EventKind, data?: any) {
             _this.sendMessage(kind, data, id);

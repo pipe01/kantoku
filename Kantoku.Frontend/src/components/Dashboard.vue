@@ -2,12 +2,17 @@
 .container-fluid.h-100.is-flex.is-flex-direction-column
     .hero.blue-back
         .hero-body
-            .container
-                h1.title.has-text-light Kantoku
+            .container.is-flex.is-align-items-center
+                img(:src="connected ? '/img/kantoku.png' : '/img/kantoku_error.png'" height="70" width="70")
+                span.title.has-text-light.has-text-weight-light.ml-3 Kantoku
 
-    .sessions.is-flex-grow-1.is-flex.is-align-items-center
+    .sessions.is-flex-grow-1.is-flex.is-align-items-center(v-if="connected")
         div(v-for="session in sessions")
             Session(:session="session")
+
+    .is-flex-grow-1.is-flex.is-flex-direction-column.is-justify-content-center(v-else="")
+        p.has-text-centered.has-text-grey-light
+            | Connecting...
 </template>
 
 <script lang="ts">
@@ -23,14 +28,14 @@ export default defineComponent({
     setup() {
         const api = provideApi();
 
-        return { sessions: api.sessions }
+        return { sessions: api.sessions, connected: api.connected }
     }
 })
 </script>
 
 <style lang="scss" scoped>
 .blue-back {
-    background: #1561C2;
+    background: #368DFF;
 }
 
 .sessions {
