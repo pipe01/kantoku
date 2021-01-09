@@ -7,6 +7,13 @@ namespace Kantoku.Master.Frontend
         SessionStart,
         SessionEnd,
         SessionUpdate,
+
+        Pause,
+        Play,
+        Stop,
+        Previous,
+        Next,
+        SetPosition,
     }
 
     public class Event

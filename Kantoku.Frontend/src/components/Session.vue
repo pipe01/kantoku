@@ -9,17 +9,21 @@ section.is-flex.is-flex-direction-column.is-align-items-center.px-5
     span.mb-2 {{session.position}}
 
     .controls
-        button.button.is-large
+        button.button.is-large(@click="api.previous")
             icon(icon="backward")
-        button.button.is-large
-            icon(v-if="session.isPlaying" icon="pause")
-            icon(v-else="" icon="play")
-        button.button.is-large
+            
+        button.button.is-large(v-if="session.isPlaying" @click="api.pause")
+            icon(icon="pause")
+        button.button.is-large(v-else="" @click="api.play")
+            icon(icon="play")
+
+        button.button.is-large(@click="api.next")
             icon(icon="forward")
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue'
+import { useApi } from '../api';
 import { Session } from "../models";
 
 export default defineComponent({
@@ -32,7 +36,9 @@ export default defineComponent({
     setup(props) {
         const sliderValue = computed(() => (props.session.position / props.session.media.duration) * 1000);
 
-        return { sliderValue }
+        const api = useApi();
+
+        return { sliderValue, api }
     }
 })
 </script>

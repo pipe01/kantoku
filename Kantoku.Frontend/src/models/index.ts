@@ -2,11 +2,18 @@ export enum EventKind {
     SessionStart,
     SessionEnd,
     SessionUpdated,
+
+    Pause,
+    Play,
+    Stop,
+    Previous,
+    Next,
+    SetPosition,
 }
 
 export interface Event {
     kind: EventKind;
-    data: any;
+    data?: any;
 }
 
 export interface Session {

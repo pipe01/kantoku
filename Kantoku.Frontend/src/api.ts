@@ -55,4 +55,37 @@ class ApiClient {
             }
         }
     }
+
+    private sendMessage(kind: models.EventKind, data?: any) {
+        const ev: models.Event = { kind }
+        if (data) {
+            ev.data = data;
+        }
+
+        this.ws.send(JSON.stringify(ev))
+    }
+
+    public pause() {
+        this.sendMessage(models.EventKind.Pause);
+    }
+
+    public play() {
+        this.sendMessage(models.EventKind.Play);
+    }
+
+    public stop() {
+        this.sendMessage(models.EventKind.Stop);
+    }
+
+    public previous() {
+        this.sendMessage(models.EventKind.Previous);
+    }
+
+    public next() {
+        this.sendMessage(models.EventKind.Next);
+    }
+
+    public setPosition(pos: number) {
+        this.sendMessage(models.EventKind.SetPosition, pos);
+    }
 }
