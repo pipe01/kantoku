@@ -33,7 +33,6 @@
     <PackageReference Include="System.Drawing.Common" Version="5.0.0" />
     <PackageReference Include="System.IO.Pipelines" Version="5.0.1" />
     <PackageReference Include="TypeFinder" Version="1.0.1" />
-    <PackageReference Include="WebSocketSharp-netstandard" Version="1.0.1" />
     <PackageReference Include="YamlDotNet" Version="9.1.0" />
   </ItemGroup>
 
@@ -45,6 +44,10 @@
 
   <ItemGroup>
     <Folder Include="Frontend\API\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Libraries\websocket-sharp\websocket-sharp\websocket-sharp.csproj" />
   </ItemGroup>
 
 </Project>

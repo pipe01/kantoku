@@ -5,6 +5,7 @@ using Kantoku.Master.Media.Services;
 using Kantoku.Master.ViewModels;
 using LightInject;
 using Serilog;
+using Serilog.Events;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -60,7 +61,32 @@ namespace Kantoku.Master
 
         private static ServiceContainer InitContainer()
         {
-            var container = new ServiceContainer();
+            var logger = Log.Logger.For("Container");
+
+            var opts = new ContainerOptions
+            {
+                EnablePropertyInjection = false,
+                LogFactory = type => entry =>
+                {
+                    var level = entry.Level switch
+                    {
+                        LogLevel.Info => LogEventLevel.Verbose,
+                        LogLevel.Warning => LogEventLevel.Warning,
+                        _ => throw new ArgumentException("Invalid log level")
+                    };
+
+                    logger.Write(level, entry.Message);
+                }
+            };
+
+            var container = new ServiceContainer(opts);
+
+            container.RegisterInstance<IServiceFactory>(container);
+            container.RegisterInstance<IServiceRegistry>(container);
+            container.RegisterInstance<IServiceContainer>(container);
+
+            container.Register(typeof(ILogger<>), typeof(Logger<>));
+
             container.RegisterInstance(Log.Logger);
             container.RegisterInstance(Config.Load("config.yaml"));
             container.Register<IServiceManager, ServiceManager>();
