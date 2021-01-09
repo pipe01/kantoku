@@ -6,6 +6,7 @@
     "build": "vuedx-typecheck . && vite build"
   },
   "dependencies": {
+    "pug": "^3.0.0",
     "vue": "^3.0.5"
   },
   "devDependencies": {
