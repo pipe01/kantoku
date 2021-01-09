@@ -1,11 +1,10 @@
-import { inject, provide, reactive } from "vue";
+import { inject, provide, reactive, ref, Ref } from "vue";
 import * as models from "./models";
 
 const key = "api";
 
 export function provideApi() {
-    const ws = new WebSocket(process.env.NODE_ENV == "development" ? `ws://192.168.1.33:4545/ws` : `ws://${location.host}/ws`);
-    const api = new ApiClient(ws);
+    const api = new ApiClient();
 
     provide(key, api);
     return api;
@@ -17,12 +16,22 @@ export function useApi() {
 
 class ApiClient {
     sessions: { [id: string]: models.Session } = reactive({});
-    private ws: WebSocket;
+    connected: Ref<boolean> = ref(false);
+    private ws!: WebSocket;
 
-    constructor(ws: WebSocket) {
-        this.ws = ws;
+    constructor() {
+        this.connect();
+    }
+
+    private connect() {
+        const ws = new WebSocket(process.env.NODE_ENV == "development" ? `ws://192.168.1.33:4545/ws` : `ws://${location.host}/ws`);
 
         ws.addEventListener("message", msg => this.handleMessage(msg));
+        ws.addEventListener("open", () => this.connected.value = true);
+        ws.addEventListener("close", () => {
+            this.connected.value = false;
+            setTimeout(() => this.connect(), 5000);
+        });
     }
 
     private handleMessage(msg: MessageEvent) {
