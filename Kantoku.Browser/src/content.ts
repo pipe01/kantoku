@@ -32,7 +32,7 @@ class Session {
     }
 
     public start() {
-        window.addEventListener("beforeunload", () => close());
+        window.addEventListener("beforeunload", () => this.close());
 
         this.video.addEventListener("pause", () => this.sendMessage(Events.Paused));
         this.video.addEventListener("play", () => this.sendMessage(Events.Resumed));
