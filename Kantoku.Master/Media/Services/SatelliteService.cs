@@ -227,17 +227,24 @@ namespace Kantoku.Master.Media.Services
                 switch (kind)
                 {
                     case EventKind.Started:
-                        var info = data.ToObject<BrowserMediaInfo>(new JsonSerializerOptions
+                        BrowserMediaInfo info;
+
+                        try
                         {
-                            PropertyNameCaseInsensitive = true
-                        }) ?? throw new Exception("Invalid media data");
+                            info = data.ToObject<BrowserMediaInfo>(new JsonSerializerOptions
+                            {
+                                PropertyNameCaseInsensitive = true
+                            }) ?? throw new Exception("Invalid media data");
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Error(ex, "Failed to parse event data");
+                            break;
+                        }
 
                         Logger.Verbose("Media info: {Info}", info);
 
-                        var icon = new BitmapImage();
-                        icon.BeginInit();
-                        icon.UriSource = new Uri(info.IconUrl ?? "");
-                        icon.EndInit();
+                        var icon = new BitmapImage(new Uri(info.IconUrl ?? ""));
 
                         this.App = new AppInfo(info.AppName, icon);
                         this.Media = new MediaInfo(info.Title, info.Author, TimeSpan.FromSeconds(info.Duration));
@@ -256,7 +263,18 @@ namespace Kantoku.Master.Media.Services
                         break;
 
                     case EventKind.TimeUpdated:
-                        var times = data.EnumerateArray().Select(o => o.GetDouble()).ToArray();
+                        double[] times;
+
+                        try
+                        {
+                            times = data.EnumerateArray().Select(o => o.GetDouble()).ToArray();
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Error(ex, "Failed to parse event data");
+                            break;
+                        }
+
                         if (times.Length != 2)
                         {
 #if DEBUG
