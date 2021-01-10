@@ -125,8 +125,9 @@ namespace Kantoku.Master.Frontend
                     case EventKind.Next:
                         session.Next();
                         break;
-                    //case EventKind.SetPosition:
-                    //    break;
+                    case EventKind.SetPosition when ev.Data is JsonElement el && el.TryGetDouble(out var pos):
+                        session.SetPosition(TimeSpan.FromSeconds(pos));
+                        break;
                 }
             }
 

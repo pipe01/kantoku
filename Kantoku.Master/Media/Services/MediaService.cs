@@ -266,6 +266,13 @@ namespace Kantoku.Master.Media.Services
 
                 Logger.Verbose("Success: {Success}", await GSMTCSession.TrySkipNextAsync());
             }
+
+            public async Task SetPosition(TimeSpan time)
+            {
+                Logger.Debug("Setting position to {Time}", time);
+
+                Logger.Verbose("Success: {Success}", await GSMTCSession.TryChangePlaybackPositionAsync(time.Ticks));
+            }
         }
     }
 }

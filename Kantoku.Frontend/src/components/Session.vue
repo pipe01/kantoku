@@ -5,7 +5,7 @@ section.is-flex.is-flex-direction-column.is-align-items-center.px-5
     
     span.is-size-4.has-text-centered.has-text-weight-bold.mt-5 {{session.media.author}}
     span.is-size-5.has-text-centered.mb-5 {{session.media.title}}
-    input.slider.is-fullwidth.is-small.is-circle.my-1(type="range" step="1" min="0" max="1000" :value="sliderValue")
+    input.slider.is-fullwidth.is-small.is-circle.my-1(type="range" step="any" min="0" :max="session.media?.duration" v-model="position" @change="positionChanged")
     span.mb-2 {{formatTime(session.position)}} / {{formatTime(session.media?.duration)}}
 
     .controls
@@ -36,8 +36,11 @@ export default defineComponent({
     setup(props) {
         const api = useApi();
 
-        const sliderValue = computed(() => (props.session.position / props.session.media.duration) * 1000);
         const sessionApi = computed(() => api?.forSession(props.session.id));
+        const position = computed({
+            get: () => props.session.position,
+            set: val => props.session.position = typeof val == "string" ? Number.parseFloat(val) : val
+        })
 
         function formatTime(n: number) {
             const min = Math.floor(n / 60);
@@ -48,7 +51,11 @@ export default defineComponent({
             return `${format(min)}:${format(sec)}`;
         }
 
-        return { sliderValue, api: sessionApi, formatTime }
+        function positionChanged() {
+            sessionApi.value?.setPosition(position.value);
+        }
+
+        return { api: sessionApi, formatTime, positionChanged, position }
     }
 })
 </script>

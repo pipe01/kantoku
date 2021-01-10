@@ -20,6 +20,7 @@ namespace Kantoku.Master.Media
         Task Play();
         Task Stop();
 
+        Task SetPosition(TimeSpan time);
         Task Previous();
         Task Next();
     }

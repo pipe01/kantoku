@@ -341,6 +341,11 @@ namespace Kantoku.Master.Media.Services
                 SendMessage(EventKind.Stop);
                 return Task.CompletedTask;
             }
+
+            public Task SetPosition(TimeSpan time)
+            {
+                return Task.CompletedTask;
+            }
         }
     }
 }

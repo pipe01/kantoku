@@ -77,7 +77,7 @@ class ApiClient {
 
     private sendMessage(kind: models.EventKind, data?: any, session?: string) {
         const ev: models.Event = { kind }
-        if (data) {
+        if (data !== undefined) {
             ev.data = data;
         }
         if (session) {
