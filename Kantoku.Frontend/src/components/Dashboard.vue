@@ -6,17 +6,21 @@
                 img(:src="connected ? '/img/kantoku.png' : '/img/kantoku_error.png'" height="70" width="70")
                 span.title.has-text-light.has-text-weight-light.ml-3 Kantoku
 
-    .sessions.is-flex-grow-1.is-flex.is-align-items-center(v-if="connected")
-        div(v-for="session in sessions")
-            Session(:session="session")
-
-    .is-flex-grow-1.is-flex.is-flex-direction-column.is-justify-content-center(v-else="")
+    .is-flex-grow-1.is-flex.is-flex-direction-column.is-justify-content-center(v-if="!connected")
         p.has-text-centered.has-text-grey-light
             | Connecting...
+
+    template(v-else="")
+        .sessions.is-flex-grow-1.is-flex.is-align-items-center
+            div(v-for="session in sessions")
+                Session(:session="session" :ref="el => sessionElements[session.id] = el")
+
+        .p-5.is-flex.is-flex-direction-row.is-justify-content-center.icon-bar
+            img(v-for="session in sessions" :src="session.app?.icon" width="32" height="32")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
 import Session from "./Session.vue";
 
 import { provideApi } from "../api";
@@ -27,8 +31,9 @@ export default defineComponent({
     },
     setup() {
         const api = provideApi();
+        const sessionElements = ref([]);
 
-        return { sessions: api.sessions, connected: api.connected }
+        return { ...api, sessionElements }
     }
 })
 </script>
@@ -45,6 +50,16 @@ export default defineComponent({
     & > * {
         display: table-cell;
         scroll-snap-align: start;
+    }
+}
+
+.icon-bar > * {
+    &:not(.active) {
+        opacity: .5;
+    }
+    
+    &:not(:last-child) {
+        margin-right: 1rem;
     }
 }
 </style>
