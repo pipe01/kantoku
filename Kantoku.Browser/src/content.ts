@@ -40,14 +40,18 @@ class Session {
         this.video.addEventListener("loadedmetadata", () => this.started());
 
         getBackground().onMessage.addListener(msg => this.onBackgroundMessage(msg));
+
+        if (this.video.readyState >= this.video.HAVE_METADATA) {
+            this.started();
+        }
     }
-    
+
     sendMessage(ev: Events, data?: any) {
         if (!this.id)
             return;
     
-        debug("send message", ev, data)
-        getBackground().postMessage([ev, this.id, ...(data ? [data] : [])])
+        // debug("send message", ev, data);
+        getBackground().postMessage([ev, this.id, ...(data ? [data] : [])]);
     }
 
     close() {
@@ -61,7 +65,13 @@ class Session {
     }
 
     onBackgroundMessage(msg: any) {
-        if (!Array.isArray(msg) || msg.length < 2 || msg[1] != this.id) {
+        if (!Array.isArray(msg) || msg.length == 0) {
+            return;
+        }
+
+        if (msg[0] == Events.Keepalive) {
+            this.started();
+        } else if (msg.length < 2 || msg[1] != this.id) {
             return;
         }
 
@@ -80,6 +90,10 @@ class Session {
 
             case Events.Next:
                 this.video.currentTime += 10;
+                break;
+
+            case Events.SetPosition:
+                this.video.currentTime = msg[2];
                 break;
         }
     }

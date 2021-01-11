@@ -33,7 +33,8 @@ namespace Kantoku.Master.Media.Services
             Previous,
             Play,
             Pause,
-            Stop
+            Stop,
+            SetPosition,
         }
 
         public event EventHandler<ISession> SessionStarted = delegate { };
@@ -344,6 +345,10 @@ namespace Kantoku.Master.Media.Services
 
             public Task SetPosition(TimeSpan time)
             {
+                Logger.Debug("Set position to {Time}", time);
+
+                Writer.Write(EventKind.SetPosition, BrowserID, time.TotalSeconds);
+
                 return Task.CompletedTask;
             }
         }

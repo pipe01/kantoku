@@ -10,5 +10,6 @@ export enum Events {
     Previous,
     Play,
     Pause,
-    Stop
+    Stop,
+    SetPosition,
 }
