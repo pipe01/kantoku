@@ -36,7 +36,7 @@ class Session {
 
         this.video.addEventListener("pause", () => this.sendMessage(Events.Paused));
         this.video.addEventListener("play", () => this.sendMessage(Events.Resumed));
-        this.video.addEventListener("timeupdate", () => this.sendMessage(Events.TimeUpdated, [this.video.currentTime, this.video.duration]));
+        this.video.addEventListener("timeupdate", () => this.sendTimeUpdate());
         this.video.addEventListener("loadedmetadata", () => this.started());
 
         getBackground().onMessage.addListener(msg => this.onBackgroundMessage(msg));
@@ -50,10 +50,14 @@ class Session {
         if (!this.id)
             return;
     
-        // debug("send message", ev, data);
+        debug("send message", ev, data);
         getBackground().postMessage([ev, this.id, ...(data ? [data] : [])]);
     }
 
+    sendTimeUpdate() {
+        this.sendMessage(Events.TimeUpdated, [this.video.currentTime, this.video.duration]);
+    }
+    
     close() {
         if (this.id) {
             this.sendMessage(Events.Closed);
@@ -122,7 +126,7 @@ class Session {
 
         // Send a "started" event and start keepalive timer
         this.sendMessage(Events.Started, media);
-        this.keepalive = setInterval(() => this.sendMessage(Events.Keepalive), 5000);
+        this.keepalive = setInterval(() => this.sendTimeUpdate(), 5000);
 
         // If the video is already playing, send a "resumed" event
         if (!this.video.paused)
