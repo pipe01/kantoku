@@ -128,7 +128,9 @@ namespace Kantoku.Master.Media.Services
                 this.TimelineTimer = new Timer(500);
 
                 TimelineTimer.Elapsed += delegate { ReloadTimeline(); };
-                TimelineTimer.Start();
+
+                if (GSMTCSession.GetPlaybackInfo().PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing)
+                    TimelineTimer.Start();
 
                 GSMTCSession.MediaPropertiesChanged += GSMTCSession_MediaPropertiesChanged;
                 GSMTCSession.PlaybackInfoChanged += GSMTCSession_PlaybackInfoChanged;
