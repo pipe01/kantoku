@@ -65,6 +65,9 @@ namespace Kantoku.Master.Frontend
 
             private void Send(EventKind kind, object? data = null)
             {
+                if (this.State != WebSocketState.Open)
+                    return;
+
                 if (kind != EventKind.SessionUpdate)
                     Logger.Verbose("Sending event {Kind}", kind);
 
