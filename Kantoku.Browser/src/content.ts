@@ -38,6 +38,7 @@ class Session {
         this.video.addEventListener("play", () => this.sendMessage(Events.Resumed));
         this.video.addEventListener("timeupdate", () => this.sendTimeUpdate());
         this.video.addEventListener("loadedmetadata", () => this.started());
+        this.video.addEventListener("emptied", () => this.close());
 
         getBackground().onMessage.addListener(msg => this.onBackgroundMessage(msg));
 
@@ -46,19 +47,7 @@ class Session {
         }
     }
 
-    sendMessage(ev: Events, data?: any) {
-        if (!this.id)
-            return;
-    
-        debug("send message", ev, data);
-        getBackground().postMessage([ev, this.id, ...(data ? [data] : [])]);
-    }
-
-    sendTimeUpdate() {
-        this.sendMessage(Events.TimeUpdated, [this.video.currentTime, this.video.duration]);
-    }
-    
-    close() {
+    public close() {
         if (this.id) {
             this.sendMessage(Events.Closed);
             this.id = null;
@@ -68,6 +57,18 @@ class Session {
         }
     }
 
+    sendMessage(ev: Events, data?: any) {
+        if (!this.id)
+            return;
+    
+        // debug("send message", ev, data);
+        getBackground().postMessage([ev, this.id, ...(data ? [data] : [])]);
+    }
+
+    sendTimeUpdate() {
+        this.sendMessage(Events.TimeUpdated, [this.video.currentTime, this.video.duration]);
+    }
+    
     onBackgroundMessage(msg: any) {
         if (!Array.isArray(msg) || msg.length == 0) {
             return;
@@ -134,22 +135,28 @@ class Session {
     }
 }
 
+const sessions = new Map<Element, Session>();
+
 document.querySelectorAll("video").forEach(el => attachTo(<Element>el));
 
 var observer = new MutationObserver((mutations) => {
     for (const mut of mutations) {
-        if (mut.type == "childList")
+        if (mut.type == "childList") {
             mut.addedNodes.forEach(el => attachTo(<Element>el));
+        }
     }
 });
 
-observer.observe(document, { attributes: false, childList: true, characterData: false, subtree:true });
+observer.observe(document.body, { attributes: false, childList: true, characterData: false, subtree:true });
 
 function attachTo(element: Element) {
     if (element.tagName != "VIDEO")
         return;
 
     debug("attach to", element);
-    
-    new Session(<HTMLVideoElement>element).start();
+
+    const session = new Session(<HTMLVideoElement>element);
+    session.start();
+
+    sessions.set(element, session);
 }
