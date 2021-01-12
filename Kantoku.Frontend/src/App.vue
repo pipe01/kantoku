@@ -4,7 +4,7 @@ Dashboard
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import Dashboard from './components/Dashboard.vue'
+import Dashboard from './components/HostSelection.vue'
 
 export default defineComponent({
     name: 'App',
