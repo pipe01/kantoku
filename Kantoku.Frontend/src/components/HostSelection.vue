@@ -8,9 +8,9 @@
         nav.panel.is-flex-grow-1.mb-5(v-if="!isAdding")
             p.panel-heading Known hosts
 
-            a.panel-block(v-for="(host, i) in hosts" @click.self="useHost(host)")
+            a.panel-block(v-for="(host, i) in hosts" @click="useHost(host)")
                 span(style="margin-right:auto") {{host}}
-                button.button(@click="remove(i)")
+                button.button(@click.stop="remove(i)")
                     icon(icon="trash")
 
             a.panel-block.is-unselectable(@click="isAdding = true")
@@ -32,10 +32,11 @@ import { defineAsyncComponent, defineComponent, inject, reactive, ref } from "vu
 import { WebStorage } from "vue-web-storage";
 
 export default defineComponent({
+    emits: [ "selectedHost" ],
     components: {
         QrScanner: defineAsyncComponent(() => import("./QrScanner.vue"))
     },
-    setup() {
+    setup(_, {emit}) {
         const isAdding = ref(false);
         
         const storage = inject<WebStorage>("storage")!
@@ -66,7 +67,7 @@ export default defineComponent({
         }
 
         function useHost(host: string) {
-            alert("Use: " + host);
+            emit("selectedHost", host);
         }
 
         return { hosts, remove, useHost, isAdding, addHost }

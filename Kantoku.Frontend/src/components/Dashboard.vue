@@ -26,12 +26,19 @@ import Session from "./Session.vue";
 import { provideApi } from "../api";
 
 export default defineComponent({
+    props: {
+        host: String
+    },
     components: {
         Session
     },
-    setup() {
-        const host = process.env.NODE_ENV == "development" ? `192.168.1.33:4545` : location.host;
-        const api = provideApi(host);
+    setup(props) {
+        if (!props.host) {
+            console.error("No host defined");
+            return;
+        }
+        
+        const api = provideApi(props.host);
         
         const sessionElements = ref([]);
 
