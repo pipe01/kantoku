@@ -3,8 +3,8 @@ import * as models from "./models";
 
 const key = "api";
 
-export function provideApi() {
-    const api = new ApiClient();
+export function provideApi(host: string) {
+    const api = new ApiClient(host);
 
     provide(key, api);
     return api;
@@ -17,25 +17,35 @@ export function useApi() {
 class ApiClient {
     sessions: { [id: string]: models.Session } = reactive({});
     connected: Ref<boolean> = ref(false);
+    expectedClose = false;
     private ws!: WebSocket;
 
-    constructor() {
-        this.connect();
+    constructor(host: string) {
+        this.connect(host);
     }
 
-    private connect() {
+    private connect(host: string) {
         this.clearSessions();
 
-        this.ws = new WebSocket(process.env.NODE_ENV == "development" ? `ws://192.168.1.33:4545/ws` : `ws://${location.host}/ws`);
+        this.ws = new WebSocket(`ws://${host}/ws`);
 
         this.ws.addEventListener("message", msg => this.handleMessage(msg));
         this.ws.addEventListener("open", () => this.connected.value = true);
-        this.ws.addEventListener("close", () => {
+        this.ws.addEventListener("close", ev => {
             this.connected.value = false;
             this.clearSessions();
 
-            setTimeout(() => this.connect(), 5000);
+            if (this.expectedClose) {
+                this.expectedClose = false;
+            } else {
+                setTimeout(() => this.connect(host), 5000);
+            }
         });
+    }
+
+    public close() {
+        this.expectedClose = true;
+        this.ws.close();
     }
 
     private clearSessions() {
@@ -89,9 +99,6 @@ class ApiClient {
 
     public forSession(id: string) {
         const _this = this;
-
-        console.log(this, id);
-        
 
         function sendMessage(kind: models.EventKind, data?: any) {
             _this.sendMessage(kind, data, id);

@@ -30,7 +30,9 @@ export default defineComponent({
         Session
     },
     setup() {
-        const api = provideApi();
+        const host = process.env.NODE_ENV == "development" ? `192.168.1.33:4545` : location.host;
+        const api = provideApi(host);
+        
         const sessionElements = ref([]);
 
         return { ...api, sessionElements }
