@@ -14,10 +14,10 @@ export function useApi() {
     return inject<ApiClient>(key);
 }
 
-class ApiClient {
+export class ApiClient {
     sessions: { [id: string]: models.Session } = reactive({});
     connected: Ref<boolean> = ref(false);
-    expectedClose = false;
+    private expectedClose = false;
     private ws!: WebSocket;
 
     constructor(host: string) {
@@ -25,22 +25,32 @@ class ApiClient {
     }
 
     private connect(host: string) {
-        this.clearSessions();
+        var _this = this;
+        function scheduleConnect() {
+            setTimeout(() => _this.connect(host), 5000);
+        }
 
-        this.ws = new WebSocket(`ws://${host}/ws`);
-
-        this.ws.addEventListener("message", msg => this.handleMessage(msg));
-        this.ws.addEventListener("open", () => this.connected.value = true);
-        this.ws.addEventListener("close", ev => {
-            this.connected.value = false;
+        try {
             this.clearSessions();
 
-            if (this.expectedClose) {
-                this.expectedClose = false;
-            } else {
-                setTimeout(() => this.connect(host), 5000);
-            }
-        });
+            this.ws = new WebSocket(`wss://${host}/ws`);
+
+            this.ws.addEventListener("message", msg => this.handleMessage(msg));
+            this.ws.addEventListener("open", () => this.connected.value = true);
+            this.ws.addEventListener("close", ev => {
+                this.connected.value = false;
+                this.clearSessions();
+
+                if (this.expectedClose) {
+                    this.expectedClose = false;
+                } else {
+                    scheduleConnect();
+                }
+            });
+        } catch (e) {
+            console.error(e);
+            scheduleConnect();
+        }
     }
 
     public close() {

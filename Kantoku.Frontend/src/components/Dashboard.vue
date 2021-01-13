@@ -37,7 +37,7 @@ export default defineComponent({
             console.error("No host defined");
             return;
         }
-        
+
         const api = provideApi(props.host);
         
         const sessionElements = ref([]);
