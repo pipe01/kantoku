@@ -23,8 +23,8 @@ section.is-flex.is-flex-direction-column.is-align-items-center.px-5
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue'
-import { useApi } from '../api';
-import { Session } from "../models";
+import { useApi } from '@/api';
+import { Session } from "@/models";
 
 export default defineComponent({
     props: {

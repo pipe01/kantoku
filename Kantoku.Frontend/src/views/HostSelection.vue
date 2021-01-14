@@ -8,7 +8,7 @@
         nav.panel.is-flex-grow-1.mb-5(v-if="!isAdding")
             p.panel-heading Known hosts
 
-            a.panel-block(v-for="(host, i) in hosts" @click="useHost(host)")
+            router-link.panel-block(v-for="(host, i) in hosts" :to="'/dashboard/' + host")
                 span(style="margin-right:auto") {{host}}
                 button.button(@click.stop="remove(i)")
                     icon(icon="trash")
@@ -62,15 +62,19 @@ export default defineComponent({
         }
 
         function showScanner() {
-            cordova.plugins.barcodeScanner.scan(o => {
-                if (!o.cancelled) {
-                    if (hostRegex.test(o.text)) {
-                        addHost(o.text);
-                    } else {
-                        alert("That's not a valid Kantoku QR code");
+            if (!window.cordova && process.env.NODE_ENV == "development") {
+                addHost("192.168.1.33:4545")
+            } else {
+                cordova.plugins.barcodeScanner.scan(o => {
+                    if (!o.cancelled) {
+                        if (hostRegex.test(o.text)) {
+                            addHost(o.text);
+                        } else {
+                            alert("That's not a valid Kantoku QR code");
+                        }
                     }
-                }
-            });
+                });
+            }
         }
 
         return { hosts, remove, useHost, isAdding, addHost, showScanner }

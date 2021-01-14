@@ -3,7 +3,8 @@
     .hero.blue-back
         .hero-body
             .container.is-flex.is-align-items-center
-                img(:src="connected ? 'img/kantoku.png' : 'img/kantoku_error.png'" height="70" width="70")
+                router-link(to="/")
+                    img(:src="connected ? 'img/kantoku.png' : 'img/kantoku_error.png'" height="70" width="70")
                 span.title.has-text-light.has-text-weight-light.ml-3 Kantoku
 
     .is-flex-grow-1.is-flex.is-flex-direction-column.is-justify-content-center(v-if="!connected")
@@ -20,10 +21,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
-import Session from "./Session.vue";
+import { defineComponent, onUnmounted, ref } from 'vue';
+import Session from "@/components/Session.vue";
 
-import { provideApi } from "../api";
+import { provideApi } from "@/api";
+import { useRoute, useRouter } from 'vue-router';
 
 export default defineComponent({
     props: {
@@ -32,17 +34,29 @@ export default defineComponent({
     components: {
         Session
     },
-    setup(props) {
-        if (!props.host) {
+    setup() {
+        const route = useRoute();
+
+        const host = route.params["host"];
+        if (!host || typeof host != "string") {
             console.error("No host defined");
             return;
         }
 
-        const api = provideApi(props.host);
+        const api = provideApi(host);
+
+        onUnmounted(() => {
+            api.close();
+        });
         
         const sessionElements = ref([]);
 
-        return { ...api, sessionElements }
+        function onBack() {
+            console.log("adsd");
+            useRouter().back();
+        }
+
+        return { ...api, sessionElements, onBack }
     }
 })
 </script>

@@ -16,7 +16,7 @@ export class ApiClient {
     private connect(host: string) {
         var _this = this;
         function scheduleConnect() {
-            setTimeout(() => _this.connect(host), 5000);
+            setTimeout(() => _this.connect(host), 2000);
         }
 
         try {

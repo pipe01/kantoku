@@ -17,10 +17,12 @@
     "bulma-slider": "^2.0.4",
     "vite-babel-plugin": "0.0.2",
     "vue": "^3.0.5",
+    "vue-router": "^4.0.0-0",
     "vue-web-storage": "^6.0.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",
+    "@vue/cli-plugin-router": "^4.5.10",
     "@vue/cli-plugin-typescript": "~4.5.0",
     "@vue/cli-service": "~4.5.0",
     "@vue/compiler-sfc": "^3.0.0",
