@@ -8,10 +8,7 @@
         nav.panel.is-flex-grow-1.mb-5(v-if="!isAdding")
             p.panel-heading Known hosts
 
-            router-link.panel-block(v-for="(host, i) in hosts" :to="'/dashboard/' + host")
-                span(style="margin-right:auto") {{host}}
-                button.button(@click.stop="remove(i)")
-                    icon(icon="trash")
+            HostListItem.panel-block(v-for="(host, i) in hosts" :host="host" @remove="remove(i)")
 
             a.panel-block.is-unselectable(@click="showScanner")
                 span.panel-icon
@@ -23,11 +20,16 @@
 import { defineComponent, inject, reactive, ref } from "vue"
 import { WebStorage } from "vue-web-storage";
 
+import HostListItem from "@/components/HostListItem.vue";
+
 const hostRegex = /^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?):\d{1,5}$/
 
 export default defineComponent({
     emits: [ "selectedHost" ],
-    setup(_, {emit}) {
+    components: {
+        HostListItem
+    },
+    setup(_, { emit }) {
         const isAdding = ref(false);
         
         const storage = inject<WebStorage>("storage")!
@@ -51,6 +53,8 @@ export default defineComponent({
 
             if (hosts.includes(host)) {
                 alert("That host is already on the list!");
+            } else if (!hostRegex.test(host)) {
+                alert("That's not a valid Kantoku QR code");
             } else {
                 hosts.push(host);
                 save();
@@ -67,11 +71,7 @@ export default defineComponent({
             } else {
                 cordova.plugins.barcodeScanner.scan(o => {
                     if (!o.cancelled) {
-                        if (hostRegex.test(o.text)) {
-                            addHost(o.text);
-                        } else {
-                            alert("That's not a valid Kantoku QR code");
-                        }
+                        addHost(o.text);
                     }
                 });
             }

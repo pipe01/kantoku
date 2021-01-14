@@ -82,6 +82,7 @@ namespace Kantoku.Master.Frontend
 
                             ctx.Response.ContentType = "application/json";
                             ctx.Response.ContentLength64 = data.Length;
+                            ctx.Response.AddHeader("Access-Control-Allow-Origin", "*");
 
                             ctx.Response.OutputStream.Write(data);
                             ctx.Response.OutputStream.Close();
