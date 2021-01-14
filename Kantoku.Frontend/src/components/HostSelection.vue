@@ -13,29 +13,20 @@
                 button.button(@click.stop="remove(i)")
                     icon(icon="trash")
 
-            a.panel-block.is-unselectable(@click="isAdding = true")
+            a.panel-block.is-unselectable(@click="showScanner")
                 span.panel-icon
                     icon(icon="plus")
                 | Add new
-
-        .is-flex.is-flex-direction-column(v-else="")
-            QrScanner(@found="addHost")
-        
-            button.button.mt-3(@click="isAdding = false")
-                span.icon
-                    icon(icon="chevron-left")
-                span Cancel
 </template>
 
 <script lang="ts">
-import { defineAsyncComponent, defineComponent, inject, reactive, ref } from "vue"
+import { defineComponent, inject, reactive, ref } from "vue"
 import { WebStorage } from "vue-web-storage";
+
+const hostRegex = /^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?):\d{1,5}$/
 
 export default defineComponent({
     emits: [ "selectedHost" ],
-    components: {
-        QrScanner: defineAsyncComponent(() => import("./QrScanner.vue"))
-    },
     setup(_, {emit}) {
         const isAdding = ref(false);
         
@@ -70,7 +61,19 @@ export default defineComponent({
             emit("selectedHost", host);
         }
 
-        return { hosts, remove, useHost, isAdding, addHost }
+        function showScanner() {
+            cordova.plugins.barcodeScanner.scan(o => {
+                if (!o.cancelled) {
+                    if (hostRegex.test(o.text)) {
+                        addHost(o.text);
+                    } else {
+                        alert("That's not a valid Kantoku QR code");
+                    }
+                }
+            });
+        }
+
+        return { hosts, remove, useHost, isAdding, addHost, showScanner }
     }
 })
 </script>
