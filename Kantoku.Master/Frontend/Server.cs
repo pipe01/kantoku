@@ -8,11 +8,11 @@ using System;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
-using System.Reflection;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using WebSocketSharp;
+using WebSocketSharp.Net;
 using WebSocketSharp.Server;
 
 namespace Kantoku.Master.Frontend
@@ -26,25 +26,73 @@ namespace Kantoku.Master.Frontend
         private const ushort Port = 4545;
 
         private readonly ILogger Logger;
-        private readonly WebSocketServer WebServer;
+        private readonly HttpListener Listener;
+        private readonly IServiceContainer Container;
 
         public Server(ILogger<Server> logger, IServiceContainer container)
         {
             this.Logger = logger;
+            this.Container = container;
+            this.Listener = new HttpListener();
 
-            container.Register<Behaviour>();
-
-            WebServer = new WebSocketServer(4545);
-            WebServer.AddWebSocketService("/ws", () => container.GetInstance<Behaviour>());
+            Container.Register<Behaviour>();
+            Listener.Prefixes.Add($"http://0.0.0.0:{Port}/");
         }
 
         public Task Start()
         {
-            WebServer.Start();
+            Listener.Start();
+            new Thread(AcceptLoop)
+            {
+                IsBackground = true,
+                Name = "Websockets thread"
+            }.Start();
 
             Logger.Debug("Listening on {Port}", Port);
 
             return Task.CompletedTask;
+        }
+
+        private void AcceptLoop()
+        {
+            var logger = Logger.For("HTTP accept loop");
+            var sessions = new WebSocketSessionManager(new Logger());
+            sessions.Start();
+
+            while (true)
+            {
+                try
+                {
+                    var ctx = Listener.GetContext();
+
+                    switch (ctx.Request.Url.AbsolutePath)
+                    {
+                        case "/ws":
+                            var ws = ctx.AcceptWebSocket(null);
+                            var handler = Container.GetInstance<Behaviour>();
+
+                            handler.Start(ws, sessions);
+                            break;
+
+                        case "/info":
+                            var data = JsonSerializer.SerializeToUtf8Bytes(new
+                            {
+                                hostName = Environment.MachineName
+                            });
+
+                            ctx.Response.ContentType = "application/json";
+                            ctx.Response.ContentLength64 = data.Length;
+
+                            ctx.Response.OutputStream.Write(data);
+                            ctx.Response.OutputStream.Close();
+                            break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex, "Exception on loop");
+                }
+            }
         }
 
         private class Behaviour : WebSocketBehavior
