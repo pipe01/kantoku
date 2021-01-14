@@ -33,9 +33,11 @@ export default defineComponent({
         async function fetchInfo() {
             while (!exit) {
                 var nextInterval = 10000;
+                var aborter = new AbortController();
+                setTimeout(() => aborter.abort(), 2000);
             
                 try {
-                    const resp = await fetch(`http://${props.host}/info`)
+                    const resp = await fetch(`http://${props.host}/info`, { signal: aborter.signal })
                     const data = await resp.json();
 
                     info.value = data;
