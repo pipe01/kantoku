@@ -14,7 +14,8 @@
     "types": [
       "webpack-env",
       "cordova",
-      "phonegap-plugin-barcodescanner"
+      "phonegap-plugin-barcodescanner",
+      "cordova-plugin-device-name"
     ],
     "paths": {
       "@/*": [

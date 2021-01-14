@@ -14,16 +14,16 @@ namespace Kantoku.Master.ViewModels
 
         public SessionViewModel? Selected { get; set; }
 
-        public IConnectionCounter Connections { get; }
+        public IServer Server { get; }
 
         private readonly IServiceManager ServiceManager;
         private readonly SynchronizationContext SynchronizationContext;
 
-        public DashboardViewModel(IServiceManager serviceManager, SynchronizationContext synchronizationContext, IConnectionCounter connections)
+        public DashboardViewModel(IServiceManager serviceManager, SynchronizationContext synchronizationContext, IServer server)
         {
             this.ServiceManager = serviceManager;
             this.SynchronizationContext = synchronizationContext;
-            this.Connections = connections;
+            this.Server = server;
         }
 
         public async Task Start()

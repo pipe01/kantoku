@@ -23,7 +23,7 @@
         <DockPanel Grid.Row="1">
             <TextBlock DockPanel.Dock="Top" HorizontalAlignment="Center">
                 Connected clients:
-                <Run Text="{Binding Connections.Count, Mode=OneWay}" />
+                <Run Text="{Binding Server.Connections.Count, Mode=OneWay}" />
             </TextBlock>
 
             <ListView ItemsSource="{Binding Sessions}" SelectedItem="{Binding Selected}" ContextMenuOpening="ContextMenu_ContextMenuOpening" SelectionChanged="ListView_SelectionChanged">

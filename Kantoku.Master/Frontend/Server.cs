@@ -5,6 +5,8 @@ using Kantoku.Master.ViewModels;
 using LightInject;
 using Serilog;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -19,11 +21,14 @@ namespace Kantoku.Master.Frontend
 {
     public interface IServer : IHosted
     {
+        ObservableCollection<IConnection> Connections { get; }
     }
 
     public class Server : IServer
     {
         private const ushort Port = 4545;
+
+        public ObservableCollection<IConnection> Connections { get; } = new ObservableCollection<IConnection>();
 
         private readonly ILogger Logger;
         private readonly HttpListener Listener;
@@ -70,6 +75,8 @@ namespace Kantoku.Master.Frontend
                         case "/ws":
                             var ws = ctx.AcceptWebSocket(null);
                             var handler = Container.GetInstance<Behaviour>();
+                            Connections.Add(handler);
+                            handler.Closed += () => Connections.Remove(handler);
 
                             handler.Start(ws, sessions);
                             break;
@@ -96,22 +103,23 @@ namespace Kantoku.Master.Frontend
             }
         }
 
-        private class Behaviour : WebSocketBehavior
+        private class Behaviour : WebSocketBehavior, IConnection
         {
-            private event Action Closed = delegate { };
+            public event Action Closed = delegate { };
 
             private ILogger Logger;
 
+            public string? Name { get; private set; }
+            string IConnection.Name => Name ?? "Unknown";
+
             private readonly DashboardViewModel Dashboard;
             private readonly IServiceManager ServiceManager;
-            private readonly IConnectionCounter ConnectionCounter;
 
-            public Behaviour(DashboardViewModel dashboard, ILogger logger, IServiceManager serviceManager, IConnectionCounter connectionCounter)
+            public Behaviour(DashboardViewModel dashboard, ILogger logger, IServiceManager serviceManager)
             {
                 this.Dashboard = dashboard;
                 this.Logger = logger;
                 this.ServiceManager = serviceManager;
-                this.ConnectionCounter = connectionCounter;
             }
 
             private void Send(EventKind kind, object? data = null)
@@ -127,12 +135,17 @@ namespace Kantoku.Master.Frontend
                 Send(json);
             }
 
+            public void Close()
+            {
+                Context.WebSocket.Close();
+            }
+
             protected override void OnOpen()
             {
                 Logger = Logger.For($"Websocket {ID}");
                 Logger.Debug("Opened connection");
 
-                ConnectionCounter.Increment();
+                this.Name = Context.QueryString["name"];
 
                 Dashboard.Sessions.CollectionChanged += Sessions_CollectionChanged;
 
@@ -145,8 +158,6 @@ namespace Kantoku.Master.Frontend
             protected override void OnClose(CloseEventArgs e)
             {
                 Logger.Debug("Closed connection");
-
-                ConnectionCounter.Decrement();
 
                 Dashboard.Sessions.CollectionChanged -= Sessions_CollectionChanged;
                 Closed();

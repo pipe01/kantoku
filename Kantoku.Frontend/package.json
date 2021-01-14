@@ -12,6 +12,7 @@
     "@fortawesome/free-solid-svg-icons": "^5.15.2",
     "@fortawesome/vue-fontawesome": "^3.0.0-3",
     "@types/cordova": "0.0.34",
+    "@types/cordova-plugin-device-name": "^1.1.1",
     "@types/phonegap-plugin-barcodescanner": "0.0.3",
     "bulma": "^0.9.1",
     "bulma-slider": "^2.0.4",
