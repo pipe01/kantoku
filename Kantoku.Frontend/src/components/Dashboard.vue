@@ -3,7 +3,7 @@
     .hero.blue-back
         .hero-body
             .container.is-flex.is-align-items-center
-                img(:src="connected ? '/img/kantoku.png' : '/img/kantoku_error.png'" height="70" width="70")
+                img(:src="connected ? 'img/kantoku.png' : 'img/kantoku_error.png'" height="70" width="70")
                 span.title.has-text-light.has-text-weight-light.ml-3 Kantoku
 
     .is-flex-grow-1.is-flex.is-flex-direction-column.is-justify-content-center(v-if="!connected")

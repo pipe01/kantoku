@@ -22,7 +22,7 @@ export class ApiClient {
         try {
             this.clearSessions();
 
-            this.ws = new WebSocket(`wss://${host}/ws`);
+            this.ws = new WebSocket(`ws://${host}/ws`);
 
             this.ws.addEventListener("message", msg => this.handleMessage(msg));
             this.ws.addEventListener("open", () => this.connected.value = true);
