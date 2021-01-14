@@ -104,12 +104,14 @@ namespace Kantoku.Master.Frontend
 
             private readonly DashboardViewModel Dashboard;
             private readonly IServiceManager ServiceManager;
+            private readonly IConnectionCounter ConnectionCounter;
 
-            public Behaviour(DashboardViewModel dashboard, ILogger logger, IServiceManager serviceManager)
+            public Behaviour(DashboardViewModel dashboard, ILogger logger, IServiceManager serviceManager, IConnectionCounter connectionCounter)
             {
                 this.Dashboard = dashboard;
                 this.Logger = logger;
                 this.ServiceManager = serviceManager;
+                this.ConnectionCounter = connectionCounter;
             }
 
             private void Send(EventKind kind, object? data = null)
@@ -130,6 +132,8 @@ namespace Kantoku.Master.Frontend
                 Logger = Logger.For($"Websocket {ID}");
                 Logger.Debug("Opened connection");
 
+                ConnectionCounter.Increment();
+
                 Dashboard.Sessions.CollectionChanged += Sessions_CollectionChanged;
 
                 foreach (var item in Dashboard.Sessions)
@@ -141,6 +145,8 @@ namespace Kantoku.Master.Frontend
             protected override void OnClose(CloseEventArgs e)
             {
                 Logger.Debug("Closed connection");
+
+                ConnectionCounter.Decrement();
 
                 Dashboard.Sessions.CollectionChanged -= Sessions_CollectionChanged;
                 Closed();

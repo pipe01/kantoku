@@ -1,4 +1,5 @@
-﻿using Kantoku.Master.Helpers;
+﻿using Kantoku.Master.Frontend;
+using Kantoku.Master.Helpers;
 using Kantoku.Master.Media;
 using Kantoku.Master.Media.Services;
 using System.Collections.ObjectModel;
@@ -13,13 +14,16 @@ namespace Kantoku.Master.ViewModels
 
         public SessionViewModel? Selected { get; set; }
 
+        public IConnectionCounter Connections { get; }
+
         private readonly IServiceManager ServiceManager;
         private readonly SynchronizationContext SynchronizationContext;
 
-        public DashboardViewModel(IServiceManager serviceManager, SynchronizationContext synchronizationContext)
+        public DashboardViewModel(IServiceManager serviceManager, SynchronizationContext synchronizationContext, IConnectionCounter connections)
         {
             this.ServiceManager = serviceManager;
             this.SynchronizationContext = synchronizationContext;
+            this.Connections = connections;
         }
 
         public async Task Start()
