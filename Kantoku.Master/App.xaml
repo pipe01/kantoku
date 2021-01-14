@@ -5,5 +5,26 @@
              xmlns:local="clr-namespace:Kantoku.Master">
     <Application.Resources>
         <BitmapImage x:Key="Pause" UriSource="/Images/pause.png" />
+
+        <Brush x:Key="Background">#303030</Brush>
+        <Brush x:Key="BackgroundPaper">#424242</Brush>
+
+        <Brush x:Key="Primary">#90caf9</Brush>
+        <Brush x:Key="Secondary">#f48fb1</Brush>
+        <Brush x:Key="Error">#f44336</Brush>
+        <Brush x:Key="Warning">#ff9800</Brush>
+        <Brush x:Key="Info">#2196f3</Brush>
+        <Brush x:Key="Success">#4caf50</Brush>
+
+        <Brush x:Key="TextPrimary">#fff</Brush>
+
+        <Style TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        </Style>
+
+        <Style x:Key="Container" TargetType="Control">
+            <Setter Property="Background" Value="{DynamicResource BackgroundPaper}" />
+        </Style>
+        <Style TargetType="ListView" BasedOn="{StaticResource Container}" />
     </Application.Resources>
 </Application>

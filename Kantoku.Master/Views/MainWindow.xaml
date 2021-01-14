@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:Kantoku.Master"
         xmlns:helpers="clr-namespace:Kantoku.Master.Helpers"
         mc:Ignorable="d" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize"
+        Background="{StaticResource Background}"
         Title="Kantoku" Height="234" Width="324">
 
     <Grid Margin="15">
@@ -15,7 +16,7 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center"
-                   FontSize="30" Foreground="#1561C2">
+                   FontSize="30" Foreground="{StaticResource Info}">
             Kantoku master
         </TextBlock>
 
@@ -34,6 +35,7 @@
                                 <Image Source="{StaticResource Pause}" Width="16" Height="16" Opacity=".5"
                                        Visibility="{Binding Session.IsPlaying, Converter={helpers:BoolToVisibilityConverter}, ConverterParameter='true'}"></Image>
                             </Canvas>
+
                             <TextBlock Text="{Binding FullName}"></TextBlock>
                             <TextBlock Text=" ("></TextBlock>
                             <TextBlock Text="{Binding Session.Position, StringFormat=mm\\:ss}"></TextBlock>
