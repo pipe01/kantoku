@@ -1,6 +1,6 @@
 @charset "utf-8";
-@import "node_modules/bulma/bulma";
-@import 'node_modules/bulma-slider/src/sass';
+@import "~bulma/bulma";
+@import '~bulma-slider/src/sass';
 
 html, body, #app, .h-100 {
     @extend .h-100;

@@ -3,17 +3,6 @@ import * as models from "./models";
 
 const key = "api";
 
-export function provideApi(host: string) {
-    const api = new ApiClient(host);
-
-    provide(key, api);
-    return api;
-}
-
-export function useApi() {
-    return inject<ApiClient>(key);
-}
-
 export class ApiClient {
     sessions: { [id: string]: models.Session } = reactive({});
     connected: Ref<boolean> = ref(false);
@@ -37,7 +26,7 @@ export class ApiClient {
 
             this.ws.addEventListener("message", msg => this.handleMessage(msg));
             this.ws.addEventListener("open", () => this.connected.value = true);
-            this.ws.addEventListener("close", ev => {
+            this.ws.addEventListener("close", () => {
                 this.connected.value = false;
                 this.clearSessions();
 
@@ -84,10 +73,10 @@ export class ApiClient {
             {
                 const data = ev.data as models.Session;
                 
-                const session = this.sessions[ev.data.id];
+                const session = this.sessions[data.id];
                 const icon = session.app?.icon;
                 
-                Object.assign(session, ev.data);
+                Object.assign(session, data);
 
                 session.app.icon = icon;
                 break;
@@ -135,4 +124,15 @@ export class ApiClient {
             }
         }
     }
+}
+
+export function provideApi(host: string) {
+    const api = new ApiClient(host);
+
+    provide(key, api);
+    return api;
+}
+
+export function useApi() {
+    return inject<ApiClient>(key);
 }
