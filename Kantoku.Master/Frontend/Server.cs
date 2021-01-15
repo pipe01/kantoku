@@ -73,6 +73,8 @@ namespace Kantoku.Master.Frontend
                     switch (ctx.Request.Url.AbsolutePath)
                     {
                         case "/ws":
+                            logger.Debug("Requested websocket connection: {Query}", ctx.Request.Url.Query);
+
                             var ws = ctx.AcceptWebSocket(null);
                             var handler = Container.GetInstance<Behaviour>();
                             Connections.Add(handler);
@@ -82,6 +84,8 @@ namespace Kantoku.Master.Frontend
                             break;
 
                         case "/info":
+                            logger.Debug("Requested info");
+
                             var data = JsonSerializer.SerializeToUtf8Bytes(new
                             {
                                 hostName = Environment.MachineName
@@ -143,9 +147,10 @@ namespace Kantoku.Master.Frontend
             protected override void OnOpen()
             {
                 Logger = Logger.For($"Websocket {ID}");
-                Logger.Debug("Opened connection");
 
                 this.Name = Context.QueryString["name"];
+
+                Logger.Debug("Opened connection. name: {Name}", Name);
 
                 Dashboard.Sessions.CollectionChanged += Sessions_CollectionChanged;
 
