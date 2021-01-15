@@ -58,10 +58,10 @@
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0" FontSize="15" TextWrapping="Wrap">
-                To link a new device, tap on "Add new" on the Kantoku Remote app then scan this QR code:
+                To link a new device, tap on "Add new" on the <Bold>Kantoku Remote</Bold> app then scan this QR code:
             </TextBlock>
 
-            <Image Grid.Row="1" Source="{Binding AddressCode}"></Image>
+            <Image Grid.Row="1" Source="{Binding AddressCode}" Margin="10"></Image>
 
             <TextBlock Grid.Row="2" HorizontalAlignment="Left" Visibility="{Binding ControlsShown, Converter={helpers:BoolToVisibilityConverter}, ConverterParameter=true}">
                 <Hyperlink Foreground="{StaticResource Info}" Command="{Binding ShowControls}">Not working?</Hyperlink>
