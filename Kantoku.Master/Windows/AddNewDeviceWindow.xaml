@@ -4,8 +4,40 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Kantoku.Master.Windows"
-        mc:Ignorable="d" WindowStartupLocation="CenterOwner"
+        xmlns:vm="clr-namespace:Kantoku.Master.ViewModels"
+        xmlns:helpers="clr-namespace:Kantoku.Master.Helpers"
+        mc:Ignorable="d" WindowStartupLocation="CenterOwner" d:DataContext="{d:DesignInstance Type={x:Type vm:AddDeviceViewModel}}"
         Title="Add new device" Height="444" Width="614" MinWidth="614" MinHeight="444">
+
+    <Window.Resources>
+        <Style x:Key="ArrowButton" TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderBrush="#70FFFFFF" BorderThickness="{TemplateBinding BorderThickness}"
+                                Background="Transparent" Name="border">
+                            <Path Grid.Column="0" Data="M0,0 L0,2 L4,6 L8,2 L8,0 L4,4 z" HorizontalAlignment="Center" Fill="White" VerticalAlignment="Center" RenderTransformOrigin="0.5, 0.5">
+                                <Path.RenderTransform>
+                                    <RotateTransform Angle="90" />
+                                </Path.RenderTransform>
+                            </Path>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+            <Setter Property="RenderTransformOrigin" Value="0.5, 0.5" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderThickness" Value="1" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+    
     <Grid Margin="15">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
@@ -22,11 +54,34 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <TextBlock FontSize="15" TextWrapping="Wrap">
+            <TextBlock Grid.Row="0" FontSize="15" TextWrapping="Wrap">
                 To link a new device, tap on "Add new" on the Kantoku Remote app then scan this QR code:
             </TextBlock>
+
+            <Image Grid.Row="1" Source="{Binding AddressCode}"></Image>
+
+            <Grid Grid.Row="2" Height="20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="0" Style="{StaticResource ArrowButton}" Command="{Binding GoLeft}"
+                        Visibility="{Binding HasLeft, Converter={helpers:BoolToVisibilityConverter}}"></Button>
+
+                <TextBlock Grid.Column="1" Text="{Binding SelectedAddress}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+                <Button Grid.Column="2" Style="{StaticResource ArrowButton}" Command="{Binding GoRight}"
+                        Visibility="{Binding HasRight, Converter={helpers:BoolToVisibilityConverter}}">
+                    <Button.RenderTransform>
+                        <RotateTransform Angle="180" />
+                    </Button.RenderTransform>
+                </Button>
+            </Grid>
         </Grid>
     </Grid>
 </Window>

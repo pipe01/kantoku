@@ -54,5 +54,9 @@
             <Setter Property="Background" Value="{DynamicResource BackgroundPaper}" />
         </Style>
         <Style TargetType="ListView" BasedOn="{StaticResource Container}" />
+
+        <Style TargetType="ComboBox">
+            <Setter Property="Foreground" Value="Black" />
+        </Style>
     </Application.Resources>
 </Application>

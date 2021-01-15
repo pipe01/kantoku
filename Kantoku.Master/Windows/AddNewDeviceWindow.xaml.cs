@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Kantoku.Master.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,6 +23,8 @@ namespace Kantoku.Master.Windows
         public AddNewDeviceWindow()
         {
             InitializeComponent();
+
+            this.DataContext = new AddDeviceViewModel();
         }
     }
 }
