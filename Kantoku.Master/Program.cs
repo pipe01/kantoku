@@ -92,6 +92,7 @@ namespace Kantoku.Master
             container.RegisterSingleton<IServiceManager, ServiceManager>();
             container.RegisterSingleton<IAppInfoFetcher, AppInfoFetcher>();
             container.RegisterSingleton<IServer, Server>();
+            container.RegisterSingleton<INetwork, Network>();
 
             container.RegisterSingleton<DashboardViewModel>();
             container.RegisterSingleton<MainWindow>();

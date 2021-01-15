@@ -27,6 +27,11 @@
         <application android:usesCleartextTraffic="true" />
     </edit-config>
 
+    <config-file target="AndroidManifest.xml" parent="/manifest/application">
+      <activity android:name="com.google.zxing.client.android.CaptureActivity" android:clearTaskOnLaunch="true" android:configChanges="orientation|keyboardHidden|screenSize" android:theme="@android:style/Theme.NoTitleBar.Fullscreen" android:windowSoftInputMode="stateAlwaysHidden" android:exported="false"/>
+      <activity android:name="com.google.zxing.client.android.encode.EncodeActivity" android:label="Share"/>
+    </config-file>
+
     <platform name="android">
         <icon src="../../Assets/ic_launcher/res/mipmap-mdpi/ic_launcher.png" density="mdpi" />
         <icon src="../../Assets/ic_launcher/res/mipmap-hdpi/ic_launcher.png" density="hdpi" />

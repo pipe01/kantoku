@@ -33,15 +33,19 @@ namespace Kantoku.Master.Frontend
         private readonly ILogger Logger;
         private readonly HttpListener Listener;
         private readonly IServiceContainer Container;
+        private readonly INetwork Network;
 
-        public Server(ILogger<Server> logger, IServiceContainer container)
+        public Server(ILogger<Server> logger, IServiceContainer container, INetwork network)
         {
             this.Logger = logger;
             this.Container = container;
             this.Listener = new HttpListener();
+            this.Network = network;
 
             Container.Register<Behaviour>();
             Listener.Prefixes.Add($"http://0.0.0.0:{Port}/");
+
+            network.BroadcastDiscovery();
         }
 
         public Task Start()
