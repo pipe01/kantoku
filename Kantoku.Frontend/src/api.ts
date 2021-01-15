@@ -6,7 +6,7 @@ const key = "api";
 export class ApiClient {
     sessions: { [id: string]: models.Session } = reactive({});
     connected: Ref<boolean> = ref(false);
-    private expectedClose = false;
+    private isClosing = false;
     private ws!: WebSocket;
 
     constructor(host: string) {
@@ -14,6 +14,10 @@ export class ApiClient {
     }
 
     private connect(host: string) {
+        if (this.isClosing) {
+            return;
+        }
+        
         var _this = this;
         function scheduleConnect() {
             setTimeout(() => _this.connect(host), 2000);
@@ -22,7 +26,7 @@ export class ApiClient {
         try {
             this.clearSessions();
 
-            this.ws = new WebSocket(`ws://${host}/ws?name=${encodeURIComponent(cordova.plugins.deviceName.name)}`);
+            this.ws = new WebSocket(`ws://${host}/ws?name=${encodeURIComponent(window.cordova?.plugins.deviceName.name ?? "Unknown")}`);
 
             this.ws.addEventListener("message", msg => this.handleMessage(msg));
             this.ws.addEventListener("open", () => this.connected.value = true);
@@ -30,8 +34,8 @@ export class ApiClient {
                 this.connected.value = false;
                 this.clearSessions();
 
-                if (this.expectedClose) {
-                    this.expectedClose = false;
+                if (this.isClosing) {
+                    this.isClosing = false;
                 } else {
                     scheduleConnect();
                 }
@@ -43,7 +47,7 @@ export class ApiClient {
     }
 
     public close() {
-        this.expectedClose = true;
+        this.isClosing = true;
         this.ws.close();
     }
 

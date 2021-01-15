@@ -3,16 +3,18 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Kantoku.Master"
+        xmlns:vm="clr-namespace:Kantoku.Master.ViewModels"
         xmlns:helpers="clr-namespace:Kantoku.Master.Helpers"
         mc:Ignorable="d" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize"
         Background="{StaticResource Background}"
-        Title="Kantoku" Height="234" Width="324">
+        Title="Kantoku" Height="400" Width="324">
 
     <Grid Margin="15">
         <Grid.RowDefinitions>
-            <RowDefinition Height="22*"/>
-            <RowDefinition Height="45*"/>
+            <RowDefinition Height="60"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="60"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -20,44 +22,66 @@
             Kantoku master
         </TextBlock>
 
-        <DockPanel Grid.Row="1">
-            <TextBlock DockPanel.Dock="Top" HorizontalAlignment="Center">
-                Connected clients:
-                <Run Text="{Binding Server.Connections.Count, Mode=OneWay}" />
-            </TextBlock>
+        <ListView Grid.Row="1" ItemsSource="{Binding Sessions}" BorderThickness="0" Background="Transparent">
+            <ListView.ItemTemplate>
+                <DataTemplate DataType="{x:Type vm:SessionViewModel}">
+                    <Canvas Width="24" Height="24" Margin="0 0 4 0">
+                        <Image Source="{Binding Session.App.Icon}" Width="24" Height="24"></Image>
+                        <Image Source="{StaticResource Pause}" Width="24" Height="24" Opacity=".5"
+                                Visibility="{Binding Session.IsPlaying, Converter={helpers:BoolToVisibilityConverter}, ConverterParameter='true'}"></Image>
+                    </Canvas>
+                </DataTemplate>
+            </ListView.ItemTemplate>
 
-            <ListView ItemsSource="{Binding Sessions}" SelectedItem="{Binding Selected}" ContextMenuOpening="ContextMenu_ContextMenuOpening" SelectionChanged="ListView_SelectionChanged">
-                <ListView.ItemTemplate>
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ListViewItem">
+                                <Border x:Name="Border">
+                                    <ContentPresenter />
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ListView.ItemContainerStyle>
+
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"></StackPanel>
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+        </ListView>
+
+        <!--<ListView Grid.Row="2" Margin="0 10 0 0" BorderThickness="0" ItemsSource="{Binding Connections}" DisplayMemberPath="Value.Connection.Name">
+        </ListView>-->
+
+        <Border Grid.Row="2" Background="{StaticResource BackgroundPaper}">
+            <ContentPresenter Content="{Binding}">
+                <ContentPresenter.ContentTemplate>
                     <DataTemplate>
-                        <DockPanel>
-                            <Canvas Width="16" Height="16" Margin="0 0 4 0">
-                                <Image Source="{Binding Session.App.Icon}" Width="16" Height="16"></Image>
-                                <Image Source="{StaticResource Pause}" Width="16" Height="16" Opacity=".5"
-                                       Visibility="{Binding Session.IsPlaying, Converter={helpers:BoolToVisibilityConverter}, ConverterParameter='true'}"></Image>
-                            </Canvas>
+                        <Grid>
+                            <ListView Name="list" ItemsSource="{Binding Connections}" BorderThickness="0" DisplayMemberPath="Value.Connection.Name" />
+                            <TextBlock Name="empty" Text="No connected clients" Margin="0 10 0 0"
+                                       Visibility="Collapsed" HorizontalAlignment="Center" Foreground="LightGray" />
+                        </Grid>
 
-                            <TextBlock Text="{Binding FullName}"></TextBlock>
-                            <TextBlock Text=" ("></TextBlock>
-                            <TextBlock Text="{Binding Session.Position, StringFormat=mm\\:ss}"></TextBlock>
-                            <TextBlock Text="/"></TextBlock>
-                            <TextBlock Text="{Binding Session.Media.Duration, StringFormat=mm\\:ss}"></TextBlock>
-                            <TextBlock Text=")"></TextBlock>
-                        </DockPanel>
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding Connections.Count}" Value="0">
+                                <Setter TargetName="list" Property="Visibility" Value="Collapsed"/>
+                                <Setter TargetName="empty" Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
                     </DataTemplate>
-                </ListView.ItemTemplate>
+                </ContentPresenter.ContentTemplate>
+            </ContentPresenter>
+        </Border>
 
-                <ListView.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="Play" Command="{Binding Selected.Play}"></MenuItem>
-                        <MenuItem Header="Pause" Command="{Binding Selected.Pause}"></MenuItem>
-                        <MenuItem Header="Stop" Command="{Binding Selected.Stop}"></MenuItem>
-                        <Separator/>
-                        <MenuItem Header="Previous" Command="{Binding Selected.Previous}"></MenuItem>
-                        <MenuItem Header="Next" Command="{Binding Selected.Next}"></MenuItem>
-                    </ContextMenu>
-                </ListView.ContextMenu>
-            </ListView>
-        </DockPanel>
+        <StackPanel Grid.Row="3" Margin="0 10 0 0" Orientation="Horizontal">
+            <Button>Connect new device</Button>
+            <Button>Connect new device</Button>
+        </StackPanel>
         
     </Grid>
 </Window>
