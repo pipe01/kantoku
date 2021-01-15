@@ -59,10 +59,3 @@ export default defineComponent({
     }
 })
 </script>
-
-<style lang="scss" scoped>
-.button.unstyled {
-    background-color: unset;
-    border: none;
-}
-</style>

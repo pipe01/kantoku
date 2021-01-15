@@ -11,36 +11,24 @@ using System.Windows.Media;
 using System.Windows.Interop;
 using System;
 using System.Windows;
+using System.Text.Json;
+
+using Color = System.Drawing.Color;
+using System.Linq;
 
 namespace Kantoku.Master.ViewModels
 {
     public class AddDeviceViewModel : INotifyPropertyChanged
     {
-        public string[] Addresses { get; }
-
-        public int SelectedAddressIndex { get; set; }
-        public bool ControlsShown { get; set; }
-
-        public string SelectedAddress => Addresses[SelectedAddressIndex];
-
-        public bool HasLeft => SelectedAddressIndex > 0;
-        public bool HasRight => SelectedAddressIndex < Addresses.Length - 1;
-
-        public ImageSource AddressCode => GenerateQR(SelectedAddress + ":4545");
-
-        public ICommand GoLeft { get; }
-        public ICommand GoRight { get; }
-        public ICommand ShowControls { get; }
+        public ImageSource AddressCode { get; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public AddDeviceViewModel()
         {
-            this.Addresses = GetAllLocalIPv4();
+            var addresses = GetAllLocalIPv4();
 
-            this.GoLeft = new ActionCommand(() => SelectedAddressIndex--);
-            this.GoRight = new ActionCommand(() => SelectedAddressIndex++);
-            this.ShowControls = new ActionCommand(() => ControlsShown = true);
+            AddressCode = GenerateQR(JsonSerializer.Serialize(addresses.Select(o => o + ":4545")));
         }
 
         private static ImageSource GenerateQR(string text)
@@ -48,7 +36,7 @@ namespace Kantoku.Master.ViewModels
             var qrGenerator = new QRCodeGenerator();
             var qrCodeData = qrGenerator.CreateQrCode(text, QRCodeGenerator.ECCLevel.Q);
             var qrCode = new QRCode(qrCodeData);
-            var qrCodeImage = qrCode.GetGraphic(40);
+            var qrCodeImage = qrCode.GetGraphic(20);
 
             // TODO: Delete Hbitmap object
             return Imaging.CreateBitmapSourceFromHBitmap(qrCodeImage.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());

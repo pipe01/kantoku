@@ -14,6 +14,13 @@
                 span.panel-icon
                     icon(icon="plus")
                 | Add new
+
+    .modal.is-active(v-if="isLoading")
+        .modal-background
+        .modal-card.px-5
+            section.modal-card-body.has-text-centered
+                .button.is-loading.unstyled.is-large(style="font-size: 4rem")
+                p.has-text-grey-light Connecting to master...
 </template>
 
 <script lang="ts">
@@ -31,6 +38,7 @@ export default defineComponent({
     },
     setup(_, { emit }) {
         const isAdding = ref(false);
+        const isLoading = ref(false);
         
         const storage = inject<WebStorage>("storage")!
         const hosts = reactive(storage.get<string[]>("hosts") ?? []);
@@ -69,15 +77,40 @@ export default defineComponent({
             if (!window.cordova && process.env.NODE_ENV == "development") {
                 addHost("192.168.1.33:4545")
             } else {
-                cordova.plugins.barcodeScanner.scan(o => {
-                    if (!o.cancelled) {
-                        addHost(o.text);
+                cordova.plugins.barcodeScanner.scan(async o => {
+                    if (o.cancelled) {
+                        return;
+                    }
+
+                    const endpoints: string[] = JSON.parse(o.text);
+                    if (typeof endpoints != "object") {
+                        return;
+                    }
+
+                    isLoading.value = true;
+
+                    try {
+                        const aborter = new AbortController();
+                        setTimeout(() => aborter.abort(), 3000);
+                        
+                        const promises = endpoints.map(ep => fetch(`http://${ep}/info`, { signal: aborter.signal }).then(() => ep).catch(() => null));
+                        
+                        const validResp = await Promise.any(promises).catch(() => null);
+                        aborter.abort();
+
+                        if (!validResp) {
+                            alert("Could not reach the Kantoku master. Make sure you are connected to the same WiFi network as your computer.");
+                        } else {
+                            addHost(validResp);
+                        }
+                    } finally {
+                        isLoading.value = false;
                     }
                 });
             }
         }
 
-        return { hosts, remove, useHost, isAdding, addHost, showScanner }
+        return { hosts, remove, useHost, isAdding, isLoading, addHost, showScanner }
     }
 })
 </script>

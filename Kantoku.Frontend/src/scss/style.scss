@@ -17,4 +17,9 @@ html, body, #app, .h-100 {
 
 .button {
     -webkit-tap-highlight-color: transparent;
+
+    &.unstyled {
+        background-color: unset;
+        border: none;
+    }
 }
