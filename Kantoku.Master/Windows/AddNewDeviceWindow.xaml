@@ -63,7 +63,11 @@
 
             <Image Grid.Row="1" Source="{Binding AddressCode}"></Image>
 
-            <Grid Grid.Row="2" Height="20">
+            <TextBlock Grid.Row="2" HorizontalAlignment="Left" Visibility="{Binding ControlsShown, Converter={helpers:BoolToVisibilityConverter}, ConverterParameter=true}">
+                <Hyperlink Foreground="{StaticResource Info}" Command="{Binding ShowControls}">Not working?</Hyperlink>
+            </TextBlock>
+
+            <Grid Grid.Row="2" Height="20" Visibility="{Binding ControlsShown, Converter={helpers:BoolToVisibilityConverter}}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="20" />
                     <ColumnDefinition Width="*" />

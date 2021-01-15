@@ -19,6 +19,7 @@ namespace Kantoku.Master.ViewModels
         public string[] Addresses { get; }
 
         public int SelectedAddressIndex { get; set; }
+        public bool ControlsShown { get; set; }
 
         public string SelectedAddress => Addresses[SelectedAddressIndex];
 
@@ -29,6 +30,7 @@ namespace Kantoku.Master.ViewModels
 
         public ICommand GoLeft { get; }
         public ICommand GoRight { get; }
+        public ICommand ShowControls { get; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -38,12 +40,13 @@ namespace Kantoku.Master.ViewModels
 
             this.GoLeft = new ActionCommand(() => SelectedAddressIndex--);
             this.GoRight = new ActionCommand(() => SelectedAddressIndex++);
+            this.ShowControls = new ActionCommand(() => ControlsShown = true);
         }
 
         private static ImageSource GenerateQR(string text)
         {
             var qrGenerator = new QRCodeGenerator();
-            var qrCodeData = qrGenerator.CreateQrCode(text, QRCodeGenerator.ECCLevel.H);
+            var qrCodeData = qrGenerator.CreateQrCode(text, QRCodeGenerator.ECCLevel.Q);
             var qrCode = new QRCode(qrCodeData);
             var qrCodeImage = qrCode.GetGraphic(40);
 
