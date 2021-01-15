@@ -72,6 +72,7 @@ export default defineComponent({
 
     & > * {
         display: table-cell;
+        scroll-snap-stop: always;
         scroll-snap-align: start;
     }
 }
