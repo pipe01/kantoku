@@ -1,0 +1,32 @@
+﻿<Window x:Class="Kantoku.Master.Windows.AddNewDeviceWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Kantoku.Master.Windows"
+        mc:Ignorable="d" WindowStartupLocation="CenterOwner"
+        Title="Add new device" Height="444" Width="614" MinWidth="614" MinHeight="444">
+    <Grid Margin="15">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Image>
+            <Image.Source>
+                <BitmapImage UriSource="/Images/addDeviceScreenshot.png" />
+            </Image.Source>
+        </Image>
+
+        <Grid Grid.Column="1" Margin="15 0 0 0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <TextBlock FontSize="15" TextWrapping="Wrap">
+                To link a new device, tap on "Add new" on the Kantoku Remote app then scan this QR code:
+            </TextBlock>
+        </Grid>
+    </Grid>
+</Window>

@@ -34,7 +34,7 @@ namespace Kantoku.Master.Helpers.Fetchers
             return (true, appName, logoPath);
         }
 
-        private static async Task<(bool Found, AppListEntry App, string Path, int Index)> GetAppListEntry(string appId, IEnumerable<Windows.ApplicationModel.Package> packages)
+        private static async Task<(bool Found, AppListEntry App, string Path, int Index)> GetAppListEntry(string appId, IEnumerable<global::Windows.ApplicationModel.Package> packages)
         {
             foreach (var package in packages)
             {

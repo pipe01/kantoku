@@ -1,14 +1,7 @@
-﻿using Kantoku.Master.Helpers;
-using Kantoku.Master.Helpers.Fetchers;
-using Kantoku.Master.Media.Services;
-using Kantoku.Master.ViewModels;
-using LightInject;
+﻿using LightInject;
 using Serilog;
 using System;
-using System.IO;
-using System.Threading;
 using System.Windows;
-using TypeFinder;
 
 namespace Kantoku.Master
 {
@@ -33,6 +26,11 @@ namespace Kantoku.Master
 
             if (Container == null)
                 return;
+
+            FrameworkElement.StyleProperty.OverrideMetadata(typeof(Window), new FrameworkPropertyMetadata
+            {
+                DefaultValue = FindResource(typeof(Window))
+            });
 
             MainWindow = Container.GetInstance<MainWindow>();
             MainWindow.Closed += delegate { Shutdown(); };

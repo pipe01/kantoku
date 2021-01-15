@@ -10,10 +10,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Images\addDeviceScreenshot.png" />
     <None Remove="Images\pause.png" />
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Images\addDeviceScreenshot.png" />
     <Resource Include="Images\pause.png" />
   </ItemGroup>
 

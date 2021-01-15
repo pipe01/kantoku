@@ -1,4 +1,5 @@
 ﻿using Kantoku.Master.ViewModels;
+using Kantoku.Master.Windows;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -30,6 +31,13 @@ namespace Kantoku.Master
         {
             SelectionCount += e.AddedItems.Count;
             SelectionCount -= e.RemovedItems.Count;
+        }
+
+        private void AddNewDevice_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new AddNewDeviceWindow();
+            dialog.Owner = this;
+            dialog.ShowDialog();
         }
     }
 }

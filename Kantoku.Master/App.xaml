@@ -19,6 +19,10 @@
         <Brush x:Key="TextPrimary">#fff</Brush>
         <Brush x:Key="TextSecondary">#b2ffffff</Brush>
 
+        <Style TargetType="Window">
+            <Setter Property="Background" Value="{DynamicResource Background}" />
+        </Style>
+
         <Style TargetType="TextBlock">
             <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
         </Style>

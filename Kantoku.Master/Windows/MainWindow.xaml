@@ -6,7 +6,6 @@
         xmlns:vm="clr-namespace:Kantoku.Master.ViewModels"
         xmlns:helpers="clr-namespace:Kantoku.Master.Helpers"
         mc:Ignorable="d" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize"
-        Background="{StaticResource Background}"
         Title="Kantoku" Height="400" Width="324">
 
     <Grid Margin="15">
@@ -85,7 +84,7 @@
         </Border>
 
         <StackPanel Grid.Row="3" Margin="0 10 0 0" Orientation="Horizontal">
-            <Button>Connect new device</Button>
+            <Button Click="AddNewDevice_Click">Connect new device</Button>
         </StackPanel>
         
     </Grid>
