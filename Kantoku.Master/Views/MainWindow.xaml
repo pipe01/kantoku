@@ -26,6 +26,10 @@
             <ListView.ItemTemplate>
                 <DataTemplate DataType="{x:Type vm:SessionViewModel}">
                     <Canvas Width="24" Height="24" Margin="0 0 4 0">
+                        <Canvas.ToolTip>
+                            <TextBlock Foreground="Black" Text="{Binding FullName}" />
+                        </Canvas.ToolTip>
+                        
                         <Image Source="{Binding Session.App.Icon}" Width="24" Height="24"></Image>
                         <Image Source="{StaticResource Pause}" Width="24" Height="24" Opacity=".5"
                                 Visibility="{Binding Session.IsPlaying, Converter={helpers:BoolToVisibilityConverter}, ConverterParameter='true'}"></Image>
@@ -54,15 +58,17 @@
             </ListView.ItemsPanel>
         </ListView>
 
-        <!--<ListView Grid.Row="2" Margin="0 10 0 0" BorderThickness="0" ItemsSource="{Binding Connections}" DisplayMemberPath="Value.Connection.Name">
-        </ListView>-->
-
         <Border Grid.Row="2" Background="{StaticResource BackgroundPaper}">
             <ContentPresenter Content="{Binding}">
                 <ContentPresenter.ContentTemplate>
                     <DataTemplate>
                         <Grid>
-                            <ListView Name="list" ItemsSource="{Binding Connections}" BorderThickness="0" DisplayMemberPath="Value.Connection.Name" />
+                            <DockPanel Name="list">
+                                <TextBlock DockPanel.Dock="Top" Background="{StaticResource Background}" Padding="5" Foreground="{StaticResource TextSecondary}">
+                                    Connected clients:
+                                </TextBlock>
+                                <ListView ItemsSource="{Binding Connections}" BorderThickness="0" DisplayMemberPath="Value.Connection.Name" />
+                            </DockPanel>
                             <TextBlock Name="empty" Text="No connected clients" Margin="0 10 0 0"
                                        Visibility="Collapsed" HorizontalAlignment="Center" Foreground="LightGray" />
                         </Grid>
@@ -79,7 +85,6 @@
         </Border>
 
         <StackPanel Grid.Row="3" Margin="0 10 0 0" Orientation="Horizontal">
-            <Button>Connect new device</Button>
             <Button>Connect new device</Button>
         </StackPanel>
         

@@ -17,6 +17,7 @@
         <Brush x:Key="Success">#4caf50</Brush>
 
         <Brush x:Key="TextPrimary">#fff</Brush>
+        <Brush x:Key="TextSecondary">#b2ffffff</Brush>
 
         <Style TargetType="TextBlock">
             <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
@@ -26,16 +27,21 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Button}">
-                        <Border Background="{TemplateBinding Background}" BorderBrush="Black" BorderThickness="1">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="Black" BorderThickness="1" Padding="10">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-            
+
+            <Setter Property="Background" Value="{DynamicResource BackgroundPaper}" />
+
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#080808" />
+                    <Setter Property="Background" Value="#04FFFFFF" />
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#10FFFFFF" />
                 </Trigger>
             </Style.Triggers>
         </Style>

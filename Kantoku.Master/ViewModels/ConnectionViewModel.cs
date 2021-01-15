@@ -1,9 +1,6 @@
-﻿using Kantoku.Master.Frontend;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Windows.Input;
+using Kantoku.Master.Frontend;
+using Kantoku.Master.Helpers;
 
 namespace Kantoku.Master.ViewModels
 {
@@ -11,9 +8,13 @@ namespace Kantoku.Master.ViewModels
     {
         public IConnection Connection { get; }
 
+        public ICommand Close { get; }
+
         public ConnectionViewModel(IConnection connection)
         {
             this.Connection = connection;
+
+            this.Close = new ActionCommand(connection.Close);
         }
     }
 }
