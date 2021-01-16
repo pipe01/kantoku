@@ -1,6 +1,8 @@
-﻿using Kantoku.Master.ViewModels;
+﻿using Kantoku.Master.Helpers;
+using Kantoku.Master.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,8 +25,25 @@ namespace Kantoku.Master.Windows
         public AddNewDeviceWindow()
         {
             InitializeComponent();
+        }
+        public AddNewDeviceWindow(AddDeviceViewModel vm) : this()
+        {
+            this.DataContext = vm;
+        }
 
-            this.DataContext = new AddDeviceViewModel();
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            e.Cancel = true;
+            this.Hide();
+        }
+
+        private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri)
+            {
+                UseShellExecute = true
+            });
+            e.Handled = true;
         }
     }
 }

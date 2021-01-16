@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using System;
 using System.Buffers;
+using System.ComponentModel;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -58,5 +59,10 @@ namespace Kantoku.Master
             => context.Post(_ => callback(), null);
         public static void Send(this SynchronizationContext context, Action callback)
             => context.Send(_ => callback(), null);
+    }
+
+    public static class Extensions
+    {
+        public static void Invoke(this PropertyChangedEventHandler? ev, object sender, string name) => ev?.Invoke(sender, new PropertyChangedEventArgs(name));
     }
 }

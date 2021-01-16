@@ -1,19 +1,14 @@
-﻿using System.Windows.Input;
-using System.Collections.Generic;
-using System.Net;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
-using Kantoku.Master.Helpers;
-using System.ComponentModel;
+﻿using Kantoku.Master.Helpers;
+using PropertyChanged;
 using QRCoder;
-using System.Windows.Media.Imaging;
-using System.Windows.Media;
-using System.Windows.Interop;
 using System;
-using System.Windows;
-using System.Text.Json;
-
+using System.ComponentModel;
 using System.Linq;
+using System.Text.Json;
+using System.Windows;
+using System.Windows.Interop;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace Kantoku.Master.ViewModels
 {
@@ -22,60 +17,65 @@ namespace Kantoku.Master.ViewModels
         [System.Runtime.InteropServices.DllImport("gdi32.dll")]
         private static extern bool DeleteObject(IntPtr hObject);
 
-        public ImageSource AddressCode { get; }
-
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public AddDeviceViewModel()
+        public bool UglyQR
         {
-            var addresses = GetAllLocalIPv4();
-
-            AddressCode = GenerateQR(JsonSerializer.Serialize(addresses.Select(o => o + ":4545")));
-        }
-
-        private static ImageSource GenerateQR(string text)
-        {
-            using var qrGenerator = new QRCodeGenerator();
-            using var qrCode = new QRCode(qrGenerator.CreateQrCode(text, QRCodeGenerator.ECCLevel.Q));
-            using var qrCodeImage = qrCode.GetGraphic(20);
-            var hbitmap = qrCodeImage.GetHbitmap();
-
-            var image = Imaging.CreateBitmapSourceFromHBitmap(hbitmap, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-            DeleteObject(hbitmap);
-
-            return image;
-        }
-
-        // https://stackoverflow.com/a/24814027
-        private static string[] GetAllLocalIPv4()
-        {
-            List<string> ipAddrList = new List<string>();
-
-            foreach (NetworkInterface item in NetworkInterface.GetAllNetworkInterfaces())
+            get => Config.UseUglyQR;
+            set
             {
-                if (item.OperationalStatus == OperationalStatus.Up)
-                {
-                    foreach (UnicastIPAddressInformation ip in item.GetIPProperties().UnicastAddresses)
-                    {
-                        if (ip.Address.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(ip.Address))
-                        {
-                            ipAddrList.Add(ip.Address.ToString());
-                        }
-                    }
-                }
+                Config.UseUglyQR = value;
+
+                PropertyChanged.Invoke(this, nameof(AddressCode));
+            }
+        }
+        public ImageSource AddressCode => GenerateNetworkQR();
+
+        private (bool Ugly, ImageSource Image)? CachedQR;
+
+        private readonly INetwork Network;
+        private readonly Config Config;
+
+        public AddDeviceViewModel(INetwork network, Config config)
+        {
+            this.Network = network;
+            this.Config = config;
+        }
+
+        private ImageSource GenerateNetworkQR()
+        {
+            if (CachedQR != null && CachedQR.Value.Ugly == UglyQR)
+            {
+                return CachedQR.Value.Image;
             }
 
-            ipAddrList.Sort();
-            return ipAddrList.ToArray();
+            var addresses = Network.GetAllLocalIPv4().Select(o => o + ":" + Config.RemotePort);
+            var payload = JsonSerializer.Serialize(addresses);
+
+            var qr = GenerateQR(payload, !UglyQR);
+            CachedQR = (UglyQR, qr);
+
+            return qr;
         }
 
-        private static IPAddress GetBroadcastAddress(IPAddress address, IPAddress mask)
+        private static ImageSource GenerateQR(string text, bool pretty = true)
         {
-            uint ipAddress = BitConverter.ToUInt32(address.GetAddressBytes(), 0);
-            uint ipMaskV4 = BitConverter.ToUInt32(mask.GetAddressBytes(), 0);
-            uint broadCastIpAddress = ipAddress | ~ipMaskV4;
+            using var qrGenerator = new QRCodeGenerator();
+            using var qrCode = new QRCode(qrGenerator.CreateQrCode(text, QRCodeGenerator.ECCLevel.M));
+            using var qrCodeImage = qrCode.GetGraphic(20, pretty ? "#C2C2C2" : "#000000", pretty ? "#424242" : "#FFFFFF");
+            var hbitmap = qrCodeImage.GetHbitmap();
 
-            return new IPAddress(BitConverter.GetBytes(broadCastIpAddress));
+            try
+            {
+                var image = Imaging.CreateBitmapSourceFromHBitmap(hbitmap, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                image.Freeze();
+
+                return image;
+            }
+            finally
+            {
+                DeleteObject(hbitmap);
+            }
         }
     }
 }

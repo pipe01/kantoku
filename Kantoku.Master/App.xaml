@@ -8,6 +8,7 @@
 
         <Brush x:Key="Background">#303030</Brush>
         <Brush x:Key="BackgroundPaper">#424242</Brush>
+        <Brush x:Key="BackgroundLight">#545454</Brush>
 
         <Brush x:Key="Primary">#90caf9</Brush>
         <Brush x:Key="Secondary">#f48fb1</Brush>
@@ -57,6 +58,10 @@
 
         <Style TargetType="ComboBox">
             <Setter Property="Foreground" Value="Black" />
+        </Style>
+
+        <Style TargetType="Hyperlink">
+            <Setter Property="Foreground" Value="{StaticResource Info}" />
         </Style>
     </Application.Resources>
 </Application>

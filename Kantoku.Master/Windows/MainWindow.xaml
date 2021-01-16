@@ -6,14 +6,14 @@
         xmlns:vm="clr-namespace:Kantoku.Master.ViewModels"
         xmlns:helpers="clr-namespace:Kantoku.Master.Helpers"
         mc:Ignorable="d" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize"
-        Title="Kantoku" Height="400" Width="324">
+        Title="Kantoku" Height="500" Width="324">
 
     <Grid Margin="15">
         <Grid.RowDefinitions>
             <RowDefinition Height="60"/>
             <RowDefinition Height="40"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="60"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -57,31 +57,68 @@
             </ListView.ItemsPanel>
         </ListView>
 
-        <Border Grid.Row="2" Background="{StaticResource BackgroundPaper}">
-            <ContentPresenter Content="{Binding}">
-                <ContentPresenter.ContentTemplate>
-                    <DataTemplate>
-                        <Grid>
-                            <DockPanel Name="list">
-                                <TextBlock DockPanel.Dock="Top" Background="{StaticResource Background}" Padding="5" Foreground="{StaticResource TextSecondary}">
-                                    Connected clients:
-                                </TextBlock>
-                                <ListView ItemsSource="{Binding Connections}" BorderThickness="0" DisplayMemberPath="Value.Connection.Name" />
-                            </DockPanel>
-                            <TextBlock Name="empty" Text="No connected clients" Margin="0 10 0 0"
-                                       Visibility="Collapsed" HorizontalAlignment="Center" Foreground="LightGray" />
-                        </Grid>
+        <TabControl Grid.Row="2" Background="{StaticResource BackgroundPaper}" BorderThickness="0">
+            <TabControl.Resources>
+                <Style TargetType="TabItem">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="TabItem">
+                                <Grid Name="Panel" Margin="-2 0 0 0">
+                                    <ContentPresenter x:Name="ContentSite"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        ContentSource="Header"
+                                        Margin="10,2"/>
+                                </Grid>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter TargetName="Panel" Property="Background" Value="{StaticResource BackgroundPaper}" />
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="False">
+                                        <Setter TargetName="Panel" Property="Background" Value="{StaticResource Background}" />
+                                    </Trigger>
+                                    <MultiTrigger>
+                                        <MultiTrigger.Conditions>
+                                            <Condition Property="IsMouseOver" Value="True" />
+                                            <Condition Property="IsSelected" Value="False" />
+                                        </MultiTrigger.Conditions>
 
-                        <DataTemplate.Triggers>
-                            <DataTrigger Binding="{Binding Connections.Count}" Value="0">
-                                <Setter TargetName="list" Property="Visibility" Value="Collapsed"/>
-                                <Setter TargetName="empty" Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                        </DataTemplate.Triggers>
-                    </DataTemplate>
-                </ContentPresenter.ContentTemplate>
-            </ContentPresenter>
-        </Border>
+                                        <Setter TargetName="Panel" Property="Background" Value="{StaticResource BackgroundLight}" />
+                                    </MultiTrigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </TabControl.Resources>
+
+            <TabItem Header="Connect new remote">
+                <Image Source="{Binding AddDevice.AddressCode}" Margin="5" />
+            </TabItem>
+
+            <TabItem Header="Connected remotes">
+                <Border Grid.Row="2" BorderThickness="0" Background="{StaticResource BackgroundPaper}">
+                    <ContentPresenter Content="{Binding}">
+                        <ContentPresenter.ContentTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <ListView Name="list" ItemsSource="{Binding Connections}" BorderThickness="0" DisplayMemberPath="Value.Connection.Name" />
+                                    <TextBlock Name="empty" Text="No connected clients" Margin="0 10 0 0"
+                                                Visibility="Collapsed" HorizontalAlignment="Center" Foreground="LightGray" />
+                                </Grid>
+
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding Connections.Count}" Value="0">
+                                        <Setter TargetName="list" Property="Visibility" Value="Collapsed"/>
+                                        <Setter TargetName="empty" Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ContentPresenter.ContentTemplate>
+                    </ContentPresenter>
+                </Border>
+            </TabItem>
+        </TabControl>
 
         <StackPanel Grid.Row="3" Margin="0 10 0 0" Orientation="Horizontal">
             <Button Click="AddNewDevice_Click">Connect new device</Button>

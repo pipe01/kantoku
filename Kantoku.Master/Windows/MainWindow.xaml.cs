@@ -1,5 +1,6 @@
 ﻿using Kantoku.Master.ViewModels;
 using Kantoku.Master.Windows;
+using System;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -10,32 +11,24 @@ namespace Kantoku.Master
     /// </summary>
     public partial class MainWindow : Window
     {
-        private int SelectionCount;
+        private readonly Func<AddNewDeviceWindow>? AddNewDeviceWindow;
 
         public MainWindow()
         {
             InitializeComponent();
         }
-        public MainWindow(DashboardViewModel viewModel) : this()
+        public MainWindow(DashboardViewModel viewModel, Func<AddNewDeviceWindow> addNewDeviceWindow) : this()
         {
             this.DataContext = viewModel;
-        }
-
-        private void ContextMenu_ContextMenuOpening(object sender, ContextMenuEventArgs e)
-        {
-            if (SelectionCount == 0)
-                e.Handled = true;
-        }
-
-        private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            SelectionCount += e.AddedItems.Count;
-            SelectionCount -= e.RemovedItems.Count;
+            this.AddNewDeviceWindow = addNewDeviceWindow;
         }
 
         private void AddNewDevice_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new AddNewDeviceWindow();
+            if (AddNewDeviceWindow == null)
+                return;
+
+            var dialog = AddNewDeviceWindow();
             dialog.Owner = this;
             dialog.ShowDialog();
         }

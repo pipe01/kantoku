@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:Kantoku.Master.Windows"
         xmlns:vm="clr-namespace:Kantoku.Master.ViewModels"
         xmlns:helpers="clr-namespace:Kantoku.Master.Helpers"
+        Closing="Window_Closing"
         mc:Ignorable="d" WindowStartupLocation="CenterOwner" d:DataContext="{d:DesignInstance Type={x:Type vm:AddDeviceViewModel}}"
         Title="Add new device" Height="444" Width="709" MinWidth="614" MinHeight="444">
 
@@ -25,13 +26,18 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0" FontSize="15" TextWrapping="Wrap">
-                To link a new device, tap on "Add new" on the <Bold>Kantoku Remote</Bold> app then scan this QR code:
+                To link a new device, tap on "Add new" on the
+                <Bold><Hyperlink NavigateUri="https://example.com" RequestNavigate="Hyperlink_RequestNavigate">Kantoku Remote</Hyperlink></Bold>
+                app then scan this QR code:
             </TextBlock>
 
             <Image Grid.Row="1" Source="{Binding AddressCode}" Margin="10"></Image>
+
+            <CheckBox Grid.Row="2" IsChecked="{Binding UglyQR}">Not working? Use a normal QR code</CheckBox>
         </Grid>
     </Grid>
 </Window>

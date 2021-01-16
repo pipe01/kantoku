@@ -3,6 +3,7 @@ using Kantoku.Master.Helpers;
 using Kantoku.Master.Helpers.Fetchers;
 using Kantoku.Master.Media.Services;
 using Kantoku.Master.ViewModels;
+using Kantoku.Master.Windows;
 using LightInject;
 using Serilog;
 using Serilog.Events;
@@ -46,6 +47,8 @@ namespace Kantoku.Master
                 });
             };
             app.Run();
+
+            container.GetInstance<Config>().Save();
         }
 
         private static void InitLogging()
@@ -95,7 +98,9 @@ namespace Kantoku.Master
             container.RegisterSingleton<INetwork, Network>();
 
             container.RegisterSingleton<DashboardViewModel>();
+            container.RegisterSingleton<AddDeviceViewModel>();
             container.RegisterSingleton<MainWindow>();
+            container.RegisterSingleton<AddNewDeviceWindow>();
 
             foreach (var type in FindTypes.InCurrentAssembly.ThatInherit<IService>())
             {

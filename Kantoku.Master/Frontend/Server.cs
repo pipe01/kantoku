@@ -26,24 +26,22 @@ namespace Kantoku.Master.Frontend
 
     public class Server : IServer
     {
-        private const ushort Port = 4545;
-
         public ObservableCollection<IConnection> Connections { get; } = new ObservableCollection<IConnection>();
 
         private readonly ILogger Logger;
         private readonly HttpListener Listener;
         private readonly IServiceContainer Container;
-        private readonly INetwork Network;
+        private readonly Config Config;
 
-        public Server(ILogger<Server> logger, IServiceContainer container, INetwork network)
+        public Server(ILogger<Server> logger, IServiceContainer container, INetwork network, Config config)
         {
             this.Logger = logger;
             this.Container = container;
             this.Listener = new HttpListener();
-            this.Network = network;
+            this.Config = config;
 
             Container.Register<Behaviour>();
-            Listener.Prefixes.Add($"http://0.0.0.0:{Port}/");
+            Listener.Prefixes.Add($"http://0.0.0.0:{config.RemotePort}/");
 
             network.BroadcastDiscovery();
         }
@@ -57,7 +55,7 @@ namespace Kantoku.Master.Frontend
                 Name = "Websockets thread"
             }.Start();
 
-            Logger.Debug("Listening on {Port}", Port);
+            Logger.Debug("Listening for remotes on {Port}", Config.RemotePort);
 
             return Task.CompletedTask;
         }
@@ -111,9 +109,10 @@ namespace Kantoku.Master.Frontend
             }
         }
 
-        private class Behaviour : WebSocketBehavior, IConnection
+        private class Behaviour : WebSocketBehavior, IConnection, INotifyPropertyChanged
         {
             public event Action Closed = delegate { };
+            public event PropertyChangedEventHandler? PropertyChanged;
 
             private ILogger Logger;
 

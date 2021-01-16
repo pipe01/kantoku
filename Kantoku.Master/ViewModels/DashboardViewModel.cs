@@ -2,7 +2,6 @@
 using Kantoku.Master.Helpers;
 using Kantoku.Master.Media;
 using Kantoku.Master.Media.Services;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Threading;
@@ -18,15 +17,17 @@ namespace Kantoku.Master.ViewModels
         public SessionViewModel? Selected { get; set; }
 
         public IServer Server { get; }
+        public AddDeviceViewModel AddDevice { get; }
 
         private readonly IServiceManager ServiceManager;
         private readonly SynchronizationContext SynchronizationContext;
 
-        public DashboardViewModel(IServiceManager serviceManager, SynchronizationContext synchronizationContext, IServer server)
+        public DashboardViewModel(IServiceManager serviceManager, SynchronizationContext synchronizationContext, IServer server, AddDeviceViewModel addDeviceViewModel)
         {
             this.ServiceManager = serviceManager;
             this.SynchronizationContext = synchronizationContext;
             this.Server = server;
+            this.AddDevice = addDeviceViewModel;
 
             server.Connections.CollectionChanged += Connections_CollectionChanged;
         }

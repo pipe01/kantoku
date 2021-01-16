@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -6,17 +7,43 @@ namespace Kantoku.Master
 {
     public class Config
     {
-        public record Provider(string Type, string? Name);
+        private string? Path;
 
-        public Provider[]? Providers { get; set; }
+        public int RemotePort { get; set; } = 4545;
+        public bool UseUglyQR { get; set; }
 
-        public static Config Load(string path)
+        public void Save()
         {
-            var deserializer = new DeserializerBuilder()
+            Debug.Assert(Path != null);
+
+            var serializer = new SerializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
 
-            return deserializer.Deserialize<Config>(File.ReadAllText(path)) ?? new Config();
+            File.WriteAllText(Path, serializer.Serialize(this));
+        }
+
+        public static Config Load(string path)
+        {
+            Config cfg;
+
+            if (File.Exists(path))
+            {
+                var deserializer = new DeserializerBuilder()
+                    .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                    .Build();
+
+                cfg = deserializer.Deserialize<Config>(File.ReadAllText(path)) ?? new Config();
+            }
+            else
+            {
+                cfg = new Config();
+            }
+
+            cfg.Path = path;
+            cfg.Save();
+
+            return cfg;
         }
     }
 }

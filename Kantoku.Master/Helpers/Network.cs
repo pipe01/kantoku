@@ -55,6 +55,7 @@ namespace Kantoku.Master.Helpers
             }
         }
 
+        // https://stackoverflow.com/a/24814027
         private static IEnumerable<UnicastIPAddressInformation> GetUnicastAddresses()
         {
             foreach (NetworkInterface item in NetworkInterface.GetAllNetworkInterfaces())
