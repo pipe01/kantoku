@@ -17,7 +17,7 @@
                 Session(:session="session" :ref="el => sessionElements[session.id] = el")
 
         .p-5.is-flex.is-flex-direction-row.is-justify-content-center.icon-bar
-            img(v-for="session in sessions" :src="session.app?.icon" width="32" height="32")
+            img(v-for="session in sessions" :src="session.app?.icon" width="32" height="32" @click="goTo(session.id)")
 </template>
 
 <script lang="ts">
@@ -25,7 +25,7 @@ import { defineComponent, onUnmounted, ref } from 'vue';
 import Session from "@/components/Session.vue";
 
 import { provideApi } from "@/api";
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 
 export default defineComponent({
     props: {
@@ -48,15 +48,16 @@ export default defineComponent({
         onUnmounted(() => {
             api.close();
         });
-        
-        const sessionElements = ref([]);
 
-        function onBack() {
-            console.log("adsd");
-            useRouter().back();
+        const sessionElements = ref<{ [id: string]: { $el: Element } }>({});
+
+        function goTo(sessionId: string) {
+            sessionElements.value[sessionId].$el.scrollIntoView({
+                behavior: "smooth"
+            });
         }
 
-        return { ...api, sessionElements, onBack }
+        return { ...api, sessionElements, goTo }
     }
 })
 </script>
