@@ -13,13 +13,15 @@ using System;
 using System.Windows;
 using System.Text.Json;
 
-using Color = System.Drawing.Color;
 using System.Linq;
 
 namespace Kantoku.Master.ViewModels
 {
     public class AddDeviceViewModel : INotifyPropertyChanged
     {
+        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+        private static extern bool DeleteObject(IntPtr hObject);
+
         public ImageSource AddressCode { get; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -33,13 +35,15 @@ namespace Kantoku.Master.ViewModels
 
         private static ImageSource GenerateQR(string text)
         {
-            var qrGenerator = new QRCodeGenerator();
-            var qrCodeData = qrGenerator.CreateQrCode(text, QRCodeGenerator.ECCLevel.Q);
-            var qrCode = new QRCode(qrCodeData);
-            var qrCodeImage = qrCode.GetGraphic(20);
+            using var qrGenerator = new QRCodeGenerator();
+            using var qrCode = new QRCode(qrGenerator.CreateQrCode(text, QRCodeGenerator.ECCLevel.Q));
+            using var qrCodeImage = qrCode.GetGraphic(20);
+            var hbitmap = qrCodeImage.GetHbitmap();
 
-            // TODO: Delete Hbitmap object
-            return Imaging.CreateBitmapSourceFromHBitmap(qrCodeImage.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+            var image = Imaging.CreateBitmapSourceFromHBitmap(hbitmap, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+            DeleteObject(hbitmap);
+
+            return image;
         }
 
         // https://stackoverflow.com/a/24814027
