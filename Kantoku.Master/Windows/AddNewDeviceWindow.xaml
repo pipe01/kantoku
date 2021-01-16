@@ -6,7 +6,6 @@
         xmlns:local="clr-namespace:Kantoku.Master.Windows"
         xmlns:vm="clr-namespace:Kantoku.Master.ViewModels"
         xmlns:helpers="clr-namespace:Kantoku.Master.Helpers"
-        Closing="Window_Closing"
         mc:Ignorable="d" WindowStartupLocation="CenterOwner" d:DataContext="{d:DesignInstance Type={x:Type vm:AddDeviceViewModel}}"
         Title="Add new device" Height="444" Width="709" MinWidth="614" MinHeight="444">
 

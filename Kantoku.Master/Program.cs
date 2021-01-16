@@ -100,7 +100,7 @@ namespace Kantoku.Master
             container.RegisterSingleton<DashboardViewModel>();
             container.RegisterSingleton<AddDeviceViewModel>();
             container.RegisterSingleton<MainWindow>();
-            container.RegisterSingleton<AddNewDeviceWindow>();
+            container.Register<AddNewDeviceWindow>();
 
             foreach (var type in FindTypes.InCurrentAssembly.ThatInherit<IService>())
             {
